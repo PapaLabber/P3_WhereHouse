@@ -17,15 +17,15 @@ public class CapacityRequest {
 
 
   public int getPalletAmount() {
-    return palletAmount;
+    return this.palletAmount;
   }
   public LocalDate getDate() {
-    return date;
+    return this.date;
   }
   public Condition getCondition() {
-    return condition;
+    return this.condition;
   }
   public ProductionSite getProductionSite() {
-    return productionSite;
+    return this.productionSite;
   }
 }
