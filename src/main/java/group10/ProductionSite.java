@@ -2,10 +2,10 @@ package group10;
 
 public class ProductionSite {
   private String name;
-  private final double longitude;
-  private final double latitude;
+  private double longitude;
+  private double latitude;
 
-  public ProbductionSite(String name, double longitude, double latitude) {
+  public ProductionSite(String name, double longitude, double latitude) {
     this.name = name;
     this.longitude = longitude;
     this.latitude = latitude;
@@ -19,7 +19,7 @@ public class ProductionSite {
     this.latitude = latitude;
   }
 
-  public String setName(String name) {
+  public void setName(String name) {
     this.name = name;
   }
 

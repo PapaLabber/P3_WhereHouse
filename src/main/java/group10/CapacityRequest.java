@@ -7,25 +7,13 @@ import group10.ProductionSite;
 public class CapacityRequest {
   private int palletAmount;
   private LocalDate date;
+  private Condition condition;
+  private ProductionSite productionSite;
 
   public CapacityRequest(int palletAmount, LocalDate date, Condition condition, ProductionSite productionSite) {
     this.palletAmount = palletAmount;
     this.date = date;
     this.condition = condition;
     this.productionSite = productionSite;
-  }
-
-
-  public int getPalletAmount() {
-    return this.palletAmount;
-  }
-  public LocalDate getDate() {
-    return this.date;
-  }
-  public Condition getCondition() {
-    return this.condition;
-  }
-  public ProductionSite getProductionSite() {
-    return this.productionSite;
   }
 }
