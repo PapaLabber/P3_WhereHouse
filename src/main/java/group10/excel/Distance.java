@@ -1,6 +1,4 @@
-package group10;
-
-import group10.ProductionSite;
+package group10.excel;
 
 public class Distance {
   private Warehouse warehouse;

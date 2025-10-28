@@ -1,8 +1,6 @@
-package group10;
+package group10.excel;
 
 import java.time.LocalDate;
-import group10.Condition;
-import group10.ProductionSite;
 
 public class CapacityRequest {
   private int palletAmount;

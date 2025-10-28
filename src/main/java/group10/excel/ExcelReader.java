@@ -1,4 +1,4 @@
-package group10;
+package group10.excel;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,12 +12,12 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-public class Excelreader {
+public class ExcelReader {
 
 	private Workbook workbook;
 	private Sheet sheet;
 
-	public Excelreader(File excelFile) throws InvalidFormatException, IOException {
+	public ExcelReader(File excelFile) throws InvalidFormatException, IOException {
 		workbook = new XSSFWorkbook(excelFile);
 		sheet = workbook.getSheetAt(0);
 	}
