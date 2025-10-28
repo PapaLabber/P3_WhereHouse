@@ -3,7 +3,6 @@ package group10.excel;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class Warehouse {
   private String name;
   private double longitude;

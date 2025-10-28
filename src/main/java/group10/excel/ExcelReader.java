@@ -25,11 +25,12 @@ public class ExcelReader {
 	public void readFromExcelFile() throws IOException {
 		// First pass: calculate maximum width for each column
 		int[] maxWidths = calculateColumnWidths();
-		
+
 		// Second pass: print with proper alignment
 		for (Row row : sheet) {
-			if (row == null) continue;
-			
+			if (row == null)
+				continue;
+
 			// Iterate through ALL columns, not just non-blank ones
 			int lastColumn = row.getLastCellNum();
 			for (int cellNum = 0; cellNum < lastColumn; cellNum++) {
@@ -40,26 +41,27 @@ public class ExcelReader {
 			}
 			System.out.println();
 		}
-		
+
 		workbook.close();
 	}
-	
+
 	private int[] calculateColumnWidths() {
 		int maxColumns = 0;
-		
+
 		// Find max number of columns
 		for (Row row : sheet) {
 			if (row != null && row.getLastCellNum() > maxColumns) {
 				maxColumns = row.getLastCellNum();
 			}
 		}
-		
+
 		int[] maxWidths = new int[maxColumns];
-		
+
 		// Calculate max width for each column
 		for (Row row : sheet) {
-			if (row == null) continue;
-			
+			if (row == null)
+				continue;
+
 			int lastColumn = row.getLastCellNum();
 			for (int cellNum = 0; cellNum < lastColumn; cellNum++) {
 				Cell cell = row.getCell(cellNum);
@@ -69,20 +71,20 @@ public class ExcelReader {
 				}
 			}
 		}
-		
+
 		return maxWidths;
 	}
-	
+
 	private String getCellValueAsString(Cell cell) {
 		// Handle null cells (blank cells)
 		if (cell == null) {
 			return "";
 		}
-		
+
 		switch (cell.getCellType()) {
 			case STRING:
 				return cell.getStringCellValue();
-			case NUMERIC: 
+			case NUMERIC:
 				if (DateUtil.isCellDateFormatted(cell)) {
 					return new SimpleDateFormat("MM-dd-yyyy").format(cell.getDateCellValue());
 				} else {
