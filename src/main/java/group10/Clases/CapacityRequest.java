@@ -1,8 +1,9 @@
-package group10;
+package group10.Clases;
 
 import java.time.LocalDate;
-import group10.Condition;
-import group10.ProductionSite;
+
+import group10.Clases.Condition;
+import group10.Clases.ProductionSite;
 
 public class CapacityRequest {
   private int palletAmount;

@@ -1,6 +1,7 @@
-package group10;
+package group10.Handler;
 
-import group10.ProductionSite;
+import group10.Clases.ProductionSite;
+import group10.Clases.Warehouse;
 
 public class Distance {
   private Warehouse warehouse;

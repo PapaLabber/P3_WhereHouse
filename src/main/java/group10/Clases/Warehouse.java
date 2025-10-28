@@ -1,11 +1,16 @@
-package group10;
+package group10.Clases;
 
-public class ProductionSite {
+import java.util.ArrayList;
+import java.util.List;
+
+
+public class Warehouse {
   private String name;
   private double longitude;
   private double latitude;
+  private List<RealisedCapacity> realisedCapacities = new ArrayList<>();
 
-  public ProductionSite(String name, double longitude, double latitude) {
+  public Warehouse(String name, double longitude, double latitude) {
     this.name = name;
     this.longitude = longitude;
     this.latitude = latitude;
@@ -19,6 +24,10 @@ public class ProductionSite {
     this.latitude = latitude;
   }
 
+  public void addRealisedCapacity(RealisedCapacity rc) {
+    realisedCapacities.add(rc);
+  }
+
   public void setName(String name) {
     this.name = name;
   }
@@ -29,6 +38,10 @@ public class ProductionSite {
 
   public double getLatitude() {
     return this.latitude;
+  }
+
+  public List<RealisedCapacity> getRealisedCapacities() {
+    return realisedCapacities;
   }
 
   public String getName() {
