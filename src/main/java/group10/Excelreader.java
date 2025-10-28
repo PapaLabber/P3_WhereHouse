@@ -22,38 +22,76 @@ public class Excelreader {
 		sheet = workbook.getSheetAt(0);
 	}
 
-	
-
 	public void readFromExcelFile() throws IOException {
+		// First pass: calculate maximum width for each column
+		int[] maxWidths = calculateColumnWidths();
+		
+		// Second pass: print with proper alignment
 		for (Row row : sheet) {
-			System.out.println();
+			if (row == null) continue;
 			
-			for (Cell cell : row) {
-				printCellValue(cell);
-				System.out.print("\t");
+			// Iterate through ALL columns, not just non-blank ones
+			int lastColumn = row.getLastCellNum();
+			for (int cellNum = 0; cellNum < lastColumn; cellNum++) {
+				Cell cell = row.getCell(cellNum);
+				String value = getCellValueAsString(cell);
+				int width = maxWidths[cellNum];
+				System.out.printf("%-" + width + "s  ", value);
 			}
+			System.out.println();
 		}
 		
 		workbook.close();
 	}
 	
-	private void printCellValue(Cell cell) {
-		 switch (cell.getCellType()) {
-         case STRING:
-         	System.out.print(cell.getStringCellValue());
-         	break;
-         case NUMERIC: 
-         	if (DateUtil.isCellDateFormatted(cell)) {
-         	 	System.out.print(new SimpleDateFormat("MM-dd-yyyy").format(cell.getDateCellValue()));
-         	} else {
-         	 	System.out.print((int) cell.getNumericCellValue());
-         	}
-           
-         	break;
-         default:
-         	break;
-     }
+	private int[] calculateColumnWidths() {
+		int maxColumns = 0;
+		
+		// Find max number of columns
+		for (Row row : sheet) {
+			if (row != null && row.getLastCellNum() > maxColumns) {
+				maxColumns = row.getLastCellNum();
+			}
+		}
+		
+		int[] maxWidths = new int[maxColumns];
+		
+		// Calculate max width for each column
+		for (Row row : sheet) {
+			if (row == null) continue;
+			
+			int lastColumn = row.getLastCellNum();
+			for (int cellNum = 0; cellNum < lastColumn; cellNum++) {
+				Cell cell = row.getCell(cellNum);
+				String value = getCellValueAsString(cell);
+				if (value.length() > maxWidths[cellNum]) {
+					maxWidths[cellNum] = value.length();
+				}
+			}
+		}
+		
+		return maxWidths;
 	}
-
+	
+	private String getCellValueAsString(Cell cell) {
+		// Handle null cells (blank cells)
+		if (cell == null) {
+			return "";
+		}
+		
+		switch (cell.getCellType()) {
+			case STRING:
+				return cell.getStringCellValue();
+			case NUMERIC: 
+				if (DateUtil.isCellDateFormatted(cell)) {
+					return new SimpleDateFormat("MM-dd-yyyy").format(cell.getDateCellValue());
+				} else {
+					return String.valueOf((int) cell.getNumericCellValue());
+				}
+			case BLANK:
+				return "";
+			default:
+				return "";
+		}
+	}
 }
-

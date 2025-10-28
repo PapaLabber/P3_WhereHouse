@@ -6,8 +6,8 @@ import java.util.List;
 
 public class Warehouse {
   private String name;
-  private final double longitude;
-  private final double latitude;
+  private double longitude;
+  private double latitude;
   private List<RealisedCapacity> realisedCapacities = new ArrayList<>();
 
   public Warehouse(String name, double longitude, double latitude) {
@@ -28,7 +28,7 @@ public class Warehouse {
     realisedCapacities.add(rc);
   }
 
-  public String setName(String name) {
+  public void setName(String name) {
     this.name = name;
   }
 
