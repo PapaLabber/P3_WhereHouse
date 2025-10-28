@@ -1,4 +1,4 @@
-package group10;
+package group10.excel;
 
 public class Condition {
   private String type;
