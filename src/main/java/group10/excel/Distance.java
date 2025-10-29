@@ -11,3 +11,4 @@ public class Distance {
     this.kilometers = kilometers;
   }
 }
+
