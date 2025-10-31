@@ -1,20 +1,3 @@
-// package group10.excel;
-
-// import java.time.LocalDate;
-
-// public class CapacityRequest {
-//   private int palletAmount;
-//   private LocalDate date;
-//   private Temperature temperature;
-//   private ProductionSite productionSite;
-
-//   public CapacityRequest(int palletAmount, LocalDate date, Temperature temperature, ProductionSite productionSite) {
-//     this.palletAmount = palletAmount;
-//     this.date = date;
-//     this.temperature = temperature;
-//     this.productionSite = productionSite;
-//   }
-// }
 
 package group10.excel;
 

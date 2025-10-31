@@ -10,13 +10,6 @@ import java.io.IOException;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-// public class Main {
-// public static void main(String[] args) throws InvalidFormatException, IOException {
-// 		File excelFile = Paths.get("").resolve("sample_employee_data.xlsx").toFile();
-// 		ExcelReader reader = new ExcelReader(excelFile);
-// 		reader.readFromExcelFile();
-// 	}
-// }
 
 public class Main {
     public static void main(String[] args) throws InvalidFormatException, IOException {

@@ -1,35 +1,4 @@
-// package group10.excel;
 
-// public class Temperature {
-//   private String ambient;
-//   private String cold;
-//   private String freeze;
-
- 
-//   public Temperature(String ambient, String cold, String freeze) {
-//     this.ambient = ambient;
-//     this.cold = cold;
-//     this.freeze = freeze;
-//   }
-
-//   public String getAmbient() {
-//     return ambient;
-//   }
-
-//   public String getCold() {
-//     return cold;
-//   }
-
-//   public String getFreeze() {
-//     return freeze;
-//   }
-
-//   @Override
-//     public String toString() {
-//         return String.format("Temperature{ambient='%s', cold='%s', freeze='%s'}", ambient, cold, freeze);
-//     }
-
-// }
 
 package group10.excel;
 
