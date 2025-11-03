@@ -1,13 +1,21 @@
 
 package group10.excel;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * Reads the first sheet of an Excel file and returns all valid CapacityRequest rows.
@@ -34,7 +42,7 @@ public class ExcelReader {
         this.sheet = workbook.getSheetAt(0);         // first sheet only
     }
 
-    public List<CapacityRequest> loadRequestsFilteredByCountry(String wantedCountry) throws IOException {
+    public List<CapacityRequest> loadRequestsFilteredByCountry(String wantedCountry, int wantedYear) throws IOException {
         Iterator<Row> it = sheet.iterator();
         if (!it.hasNext()) { // no rows at all
             workbook.close();
@@ -63,14 +71,15 @@ public class ExcelReader {
             if (pallets <= 0) {
                 continue;
             }
+        
+            int year = getIntCell(row, colIndex.get("Year"));
+            if(wantedYear != year) {
+                continue;
+            } 
 
             // C. Parse ProductionSite using the registry
             String siteName = getStringCell(row, colIndex.get("ProductionSite"));
             ProductionSite site = ProductionSite.fromName(siteName);
-            if (site == null) {
-                System.err.println("Skipping row: unknown ProductionSite '" + siteName + "'");
-                continue;
-            }
 
             // D. Parse Temperature -> TemperatureZone enum
             String tempRaw = getStringCell(row, colIndex.get("Temperature"));
@@ -80,19 +89,23 @@ public class ExcelReader {
                 continue;
             }
 
+            // E. Compute ID from row number (make 1-based if desired)
+            int ID = row.getRowNum() + 1;
 
             // F. Build domain object
             CapacityRequest req = new CapacityRequest(
                 pallets,
                 zone,
-                site
+                site,
+                ID,
+                year
             );
 
             // G. Keep it
             result.add(req);
-        }
 
         workbook.close();
+        }
         return result;
     }
 
