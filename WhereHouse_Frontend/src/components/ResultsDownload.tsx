@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Download, MapPin, CheckCircle } from 'lucide-react';
 
 interface ProcessedResult {
-  csvData: string;
+  xlsxData: string;
   filename: string;
   hasLocationData: boolean;
   locationSuggestions: string[];
@@ -37,7 +37,7 @@ export function ResultsDownload({ result, onDownload }: ResultsDownloadProps) {
           <CheckCircle className="h-6 w-6 text-green-500" />
           <h3 className="text-lg font-semibold text-[#001965]">Processing Complete</h3>
         </div>
-        
+
         <div className="space-y-2">
           <p className="text-sm text-gray-600">
             <span className="font-medium">Records processed:</span> {result.recordCount}
@@ -69,7 +69,7 @@ export function ResultsDownload({ result, onDownload }: ResultsDownloadProps) {
           className="w-full bg-[#001965] hover:bg-[#001965]/90 text-white"
         >
           <Download className="h-4 w-4 mr-2" />
-          Download Processed CSV
+          Download Processed xlsx
         </Button>
       </div>
     </Card>

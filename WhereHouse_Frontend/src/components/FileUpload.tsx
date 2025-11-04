@@ -10,10 +10,10 @@ interface FileUploadProps {
 export function FileUpload({ onFileSelect, selectedFile }: FileUploadProps) {
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const files = Array.from(e.dataTransfer.files);
-    const csvFile = files.find(file => file.name.endsWith('.csv'));
-    if (csvFile) {
-      onFileSelect(csvFile);
+    const files = Array.from(e.dataTransfer.files as FileList) as File[];
+    const xlsxFile = files.find( file => file.name.endsWith('.xlsx'));
+    if (xlsxFile instanceof File) {
+      onFileSelect(xlsxFile);
     }
   }, [onFileSelect]);
 
@@ -23,7 +23,7 @@ export function FileUpload({ onFileSelect, selectedFile }: FileUploadProps) {
 
   const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.name.endsWith('.csv')) {
+    if (file && file.name.endsWith('.xlsx')) {
       onFileSelect(file);
     }
   }, [onFileSelect]);
@@ -39,11 +39,11 @@ export function FileUpload({ onFileSelect, selectedFile }: FileUploadProps) {
         <input
           id="file-input"
           type="file"
-          accept=".csv"
+          accept=".xlsx"
           onChange={handleFileInput}
           className="hidden"
         />
-        
+
         {selectedFile ? (
           <div className="flex items-center justify-center space-x-2">
             <FileText className="h-8 w-8 text-[#001965]" />
@@ -57,7 +57,7 @@ export function FileUpload({ onFileSelect, selectedFile }: FileUploadProps) {
           <div className="space-y-4">
             <Upload className="h-12 w-12 text-gray-400 mx-auto" />
             <div>
-              <p className="text-lg">Drop your CSV file here</p>
+              <p className="text-lg">Drop your xlsx file here</p>
               <p className="text-sm text-gray-500">or click to browse</p>
             </div>
           </div>
