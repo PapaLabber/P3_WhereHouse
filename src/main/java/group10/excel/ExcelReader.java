@@ -42,7 +42,7 @@ public class ExcelReader {
         this.sheet = workbook.getSheetAt(0);         // first sheet only
     }
 
-    public List<CapacityRequest> loadRequestsFilteredByCountry(String wantedCountry, int wantedYear) throws IOException {
+    public List<CapacityRequest> filterRequest(String wantedCountry, int wantedYear) throws IOException {
         Iterator<Row> it = sheet.iterator();
         if (!it.hasNext()) { // no rows at all
             workbook.close();

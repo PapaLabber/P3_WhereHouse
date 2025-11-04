@@ -16,9 +16,9 @@ public class Main {
         ExcelReader reader = new ExcelReader(excelFile);
 
         // Filter for Denmark and pallet > 0
-        List<CapacityRequest> denmarkRequests = reader.loadRequestsFilteredByCountry("DENMARK", 2025);
+        List<CapacityRequest> wantedRequests = reader.filterRequest("DENMARK", 2025);
 
-        for(CapacityRequest req : denmarkRequests) {
+        for(CapacityRequest req : wantedRequests) {
             System.out.println(req);
         }
     }
