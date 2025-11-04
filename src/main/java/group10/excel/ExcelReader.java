@@ -62,7 +62,7 @@ public class ExcelReader {
 
             // A. Filter by Country
             String country = getStringCell(row, colIndex.get("Country"));
-            if (country == null || !wantedCountry.equalsIgnoreCase(country.trim())) {
+            if (country == null || !wantedCountry.equalsIgnoreCase(country.trim()) || !"Denmark".equalsIgnoreCase(country.trim())) {
                 continue;
             }
 
@@ -104,8 +104,8 @@ public class ExcelReader {
             // G. Keep it
             result.add(req);
 
-        workbook.close();
         }
+        workbook.close();
         return result;
     }
 
