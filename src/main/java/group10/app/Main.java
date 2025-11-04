@@ -16,11 +16,10 @@ public class Main {
         ExcelReader reader = new ExcelReader(excelFile);
 
         // Filter for Denmark and pallet > 0
-        List<CapacityRequest> wantedRequests = reader.filterRequest("DENMARK", 2027);
+        List<CapacityRequest> wantedRequests = reader.filterRequest("DENMARK", 2025);
 
         for(CapacityRequest req : wantedRequests) {
             System.out.println(req);
         }
     }
 }
-
