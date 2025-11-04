@@ -1,2 +1,8 @@
-C:\Users\luqma\Documents\GitHub\P3_WhereHouse\src\main\java\group10\Main.java
-C:\Users\luqma\Documents\GitHub\P3_WhereHouse\src\main\java\group10\Excelreader.java
+/Users/philippebourrachot/Documents/GitHub/P3_WhereHouse/src/main/java/group10/excel/ExcelReader.java
+/Users/philippebourrachot/Documents/GitHub/P3_WhereHouse/src/main/java/group10/excel/RealisedCapacity.java
+/Users/philippebourrachot/Documents/GitHub/P3_WhereHouse/src/main/java/group10/excel/Temperature.java
+/Users/philippebourrachot/Documents/GitHub/P3_WhereHouse/src/main/java/group10/excel/Warehouse.java
+/Users/philippebourrachot/Documents/GitHub/P3_WhereHouse/src/main/java/group10/excel/Distance.java
+/Users/philippebourrachot/Documents/GitHub/P3_WhereHouse/src/main/java/group10/excel/CapacityRequest.java
+/Users/philippebourrachot/Documents/GitHub/P3_WhereHouse/src/main/java/group10/excel/ProductionSite.java
+/Users/philippebourrachot/Documents/GitHub/P3_WhereHouse/src/main/java/group10/app/Main.java

@@ -1,17 +1,14 @@
 package group10.excel;
 
-import java.time.LocalDate;
 
 public class RealisedCapacity {
   private int palletAmount;
-  private LocalDate date;
-  private Condition condition;
+  private Temperature temperature;
   private Warehouse warehouse;
 
-  public RealisedCapacity(int palletAmount, LocalDate date, Condition condition, Warehouse warehouse) {
+  public RealisedCapacity(int palletAmount, Temperature temperature, Warehouse warehouse) {
     this.palletAmount = palletAmount;
-    this.date = date; // Behøves dette eller skal vi bruge datoen?
-    this.condition = condition;
+    this.temperature = temperature;
     this.warehouse = warehouse;
   }
 
@@ -19,12 +16,8 @@ public class RealisedCapacity {
     return this.palletAmount;
   }
 
-  public LocalDate getDate() {
-    return this.date;
-  }
-
-  public Condition getCondition() {
-    return this.condition;
+  public Temperature getTemperature() {
+    return this.temperature;
   }
 
   public Warehouse getWarehouse() {
