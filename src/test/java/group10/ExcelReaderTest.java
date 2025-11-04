@@ -33,7 +33,7 @@ class ExcelReaderTest {
             Row header = sh.createRow(0);
             header.createCell(0).setCellValue("Country");
             header.createCell(1).setCellValue("PalletAmount");
-            header.createCell(2).setCellValue("Year");            // <— use Year, not Date
+            header.createCell(2).setCellValue("Year");
             header.createCell(3).setCellValue("Temperature");
             header.createCell(4).setCellValue("ProductionSite");
 
