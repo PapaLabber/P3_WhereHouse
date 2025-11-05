@@ -23,4 +23,8 @@ RUN ./mvnw clean package -DskipTests
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
+
+# 👇 Add this line — copy your Excel file from backend/ into /app/
+COPY CapacitydataMay2025.xlsx /app/CapacitydataMay2025.xlsx
+
 ENTRYPOINT ["java","-jar","/app/app.jar"]
