@@ -4,11 +4,13 @@ public class RealisedCapacity {
   private int palletAmount;
   private Temperature temperature;
   private Warehouse warehouse;
+  private int year;
 
-  public RealisedCapacity(int palletAmount, Temperature temperature, Warehouse warehouse) {
+  public RealisedCapacity(int palletAmount, Temperature temperature, Warehouse warehouse, int year) {
     this.palletAmount = palletAmount;
     this.temperature = temperature;
     this.warehouse = warehouse;
+    this.year = year;
   }
 
   public int getPalletAmount() {
@@ -21,6 +23,10 @@ public class RealisedCapacity {
 
   public Warehouse getWarehouse() {
     return this.warehouse;
+  }
+
+    public int getYear() {
+    return this.year;
   }
 
   @Override

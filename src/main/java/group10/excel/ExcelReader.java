@@ -1,14 +1,17 @@
-
 package group10.excel;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -18,19 +21,16 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
- * Reads the first sheet of an Excel file and returns all valid CapacityRequest rows.
+ * Reads the first sheet of an Excel file and returns all valid CapacityRequest
+ * rows.
  *
- * A row is considered valid if:
- *  - Country matches wantedCountry (case-insensitive)
- *  - PalletAmount > 0
- *  - ProductionSite is known (ProductionSite.fromName(...) returns non-null)
- *  - Temperature can be mapped to a TemperatureZone (Ambient / Cold / Freeze)
+ * A row is considered valid if: - Country matches wantedCountry
+ * (case-insensitive) - PalletAmount > 0 - ProductionSite is known
+ * (ProductionSite.fromName(...) returns non-null) - Temperature can be mapped
+ * to a TemperatureZone (Ambient / Cold / Freeze)
  *
- * Required columns in the Excel header row:
- *   "Country"
- *   "PalletAmount"
- *   "Temperature"
- *   "ProductionSite"
+ * Required columns in the Excel header row: "Country" "PalletAmount"
+ * "Temperature" "ProductionSite"
  */
 public class ExcelReader {
 
@@ -58,11 +58,13 @@ public class ExcelReader {
         // 2. Process all data rows
         while (it.hasNext()) {
             Row row = it.next();
-            if (row == null) continue;
+            if (row == null) {
+                continue;
+            }
 
             // A. Filter by Country
             String country = getStringCell(row, colIndex.get("Country"));
-            if (country == null || !wantedCountry.equalsIgnoreCase(country.trim()) || !"Denmark".equalsIgnoreCase(country.trim())) {
+            if (country == null || !wantedCountry.equalsIgnoreCase(country.trim())) {
                 continue;
             }
 
@@ -71,11 +73,11 @@ public class ExcelReader {
             if (pallets <= 0) {
                 continue;
             }
-        
+
             int year = getIntCell(row, colIndex.get("Year"));
-            if(wantedYear != year) {
+            if (wantedYear != year) {
                 continue;
-            } 
+            }
 
             // C. Parse ProductionSite using the registry
             String siteName = getStringCell(row, colIndex.get("ProductionSite"));
@@ -94,11 +96,11 @@ public class ExcelReader {
 
             // F. Build domain object
             CapacityRequest req = new CapacityRequest(
-                pallets,
-                zone,
-                site,
-                ID,
-                year
+                    pallets,
+                    zone,
+                    site,
+                    ID,
+                    year
             );
 
             // G. Keep it
@@ -109,15 +111,81 @@ public class ExcelReader {
         return result;
     }
 
+    public List<RealisedCapacity> warehouseCapacity(String wantedCountry, int wantedYear) throws IOException {
+        Iterator<Row> it = sheet.iterator();
+        if (!it.hasNext()) { // no rows at all
+            workbook.close();
+            return Collections.emptyList();
+        }
 
+        Row headerRow = it.next();
+        Map<String, Integer> colIndex = getHeaderIndexMap(headerRow);
 
+        List<RealisedCapacity> result = new ArrayList<>();
+
+        while (it.hasNext()) {
+            Row row = it.next();
+            if (row == null) {
+                continue;
+            }
+
+            // Filter by Country
+            String country = getStringCell(row, colIndex.get("Country"));
+            if (country == null || !wantedCountry.equalsIgnoreCase(country.trim())) {
+                continue;
+            }
+            // Skip FP warehouses
+            Set<String> SKIP_WAREHOUSES = new HashSet<>(Arrays.asList("dsv", "ps hub"));
+
+            String warehouseCell = getStringCell(row, colIndex.get("Warehouse"));
+            if (warehouseCell != null && SKIP_WAREHOUSES.contains(warehouseCell.trim().toLowerCase(Locale.ROOT))) {
+                continue;
+            }
+
+            // Filter by PalletAmount > 0
+            int pallets = getIntCell(row, colIndex.get("L&D Capacity (Physical pallet spaces)"));
+            if (pallets <= 0) {
+                continue;
+            }
+
+            // Skip years that are not specified
+            int year = getIntCell(row, colIndex.get("Year"));
+            if (wantedYear != year) {
+                continue;
+            }
+
+            // Parse Warehouse using the registry
+            String warehouseName = getStringCell(row, colIndex.get("Warehouse"));
+            Warehouse warehouse = Warehouse.fromName(warehouseName);
+
+            // Parse Temperature -> TemperatureZone enum
+            String tempRaw = getStringCell(row, colIndex.get("Temperature"));
+            Temperature zone = Temperature.fromString(tempRaw);
+            if (zone == null) {
+                System.err.println("Skipping row: invalid Temperature '" + tempRaw + "'");
+                continue;
+            }
+
+            // Build domain object
+            RealisedCapacity req = new RealisedCapacity(
+                    pallets,
+                    zone,
+                    warehouse,
+                    year
+            );
+
+            // G. Keep it
+            result.add(req);
+        }
+        workbook.close();
+        return result;
+    }
 
     // ---------- helper methods below ----------
-
     /**
-     * Build map of header name -> column index.
-     * If header row has cells: [Country][PalletAmount][Date]...
-     * You'll get { "Country"=0, "PalletAmount"=1, "Date"=2, ... }
+     * Build map of header name -> column index. If header row has cells:
+     * [Country][PalletAmount][Date]... You'll get { "Country"=0,
+     * "PalletAmount"=1, "Date"=2, ... }
      */
     private Map<String, Integer> getHeaderIndexMap(Row headerRow) {
         Map<String, Integer> map = new HashMap<>();
@@ -133,9 +201,14 @@ public class ExcelReader {
      * Returns null if the cell is blank or unusable.
      */
     private String getStringCell(Row row, Integer colIdx) {
-        if (colIdx == null) return null; // header missing
+        if (colIdx == null) {
+            return null; // header missing
+
+        }
         Cell cell = row.getCell(colIdx, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-        if (cell == null) return null;
+        if (cell == null) {
+            return null;
+        }
 
         switch (cell.getCellType()) {
             case STRING:
@@ -158,13 +231,17 @@ public class ExcelReader {
     }
 
     /**
-     * Read an integer-like value from a cell.
-     * Returns 0 if blank or non-numeric.
+     * Read an integer-like value from a cell. Returns 0 if blank or
+     * non-numeric.
      */
     private int getIntCell(Row row, Integer colIdx) {
-        if (colIdx == null) return 0;
+        if (colIdx == null) {
+            return 0;
+        }
         Cell cell = row.getCell(colIdx, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-        if (cell == null) return 0;
+        if (cell == null) {
+            return 0;
+        }
 
         switch (cell.getCellType()) {
             case NUMERIC:
@@ -172,7 +249,9 @@ public class ExcelReader {
 
             case STRING:
                 String s = cell.getStringCellValue().trim();
-                if (s.isEmpty()) return 0;
+                if (s.isEmpty()) {
+                    return 0;
+                }
                 try {
                     return Integer.parseInt(s);
                 } catch (NumberFormatException e) {
@@ -182,7 +261,9 @@ public class ExcelReader {
             default:
                 return 0;
         }
-    
+
     }
 
+    // public <T> List<T> filterExcelSearch(String wantedCountry, int wantedYear) {
+    // }
 }

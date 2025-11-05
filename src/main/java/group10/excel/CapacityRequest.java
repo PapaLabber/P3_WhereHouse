@@ -1,6 +1,4 @@
-
 package group10.excel;
-
 
 /**
  * Represents ONE valid filtered row from the Excel file.
@@ -34,23 +32,22 @@ public class CapacityRequest {
     }
 
     public int getID() {
-    return ID;
+        return ID;
     }
 
     public int getYear() {
-    return year;
+        return year;
     }
 
     @Override
     public String toString() {
         return String.format(
-            "ID = %d, pallet Amount = %d, Storage Condition = %s, Production Site = %s, Year = %d",
-            ID,
-            palletAmount,
-            temperature,
-            productionSite,
-            year
+                "ID = %d, pallet Amount = %d, Storage Condition = %s, Production Site = %s, Year = %d",
+                ID,
+                palletAmount,
+                temperature,
+                productionSite,
+                year
         );
     }
 }
-

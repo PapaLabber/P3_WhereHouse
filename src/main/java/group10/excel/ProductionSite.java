@@ -40,10 +40,7 @@ public class ProductionSite {
 
     @Override
     public String toString() {
-        return String.format(
-            "ProductionSite{name='%s', longitude=%.4f, latitude=%.4f}",
-            name, longitude, latitude
-        );
+        return name;
     }
 
     // --- Static registry of allowed production sites ---
