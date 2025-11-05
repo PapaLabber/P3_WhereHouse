@@ -6,6 +6,10 @@ COPY pom.xml .
 COPY mvnw .
 COPY .mvn .mvn
 
+# fix line endings and permissions for mvnw
+RUN chmod +x mvnw && \
+    sed -i 's/\r$//' mvnw
+
 # download dependencies
 RUN ./mvnw -q -DskipTests dependency:go-offline
 
