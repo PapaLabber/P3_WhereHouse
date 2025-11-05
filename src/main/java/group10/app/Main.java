@@ -15,8 +15,11 @@ public class Main {
         File excelFile = new File("CapacitydataMay2025.xlsx");
         ExcelReader reader = new ExcelReader(excelFile);
 
+        String wantedCountry = "DENMARK"; // Skal ændres til at være dynamisk
+        int wantedYear = 2025;            // Skal ændres til at være dynamisk
+
         // Filter for Denmark and pallet > 0
-        List<CapacityRequest> wantedRequests = reader.filterRequest("DENMARK", 2025);
+        List<CapacityRequest> wantedRequests = reader.filterRequest(wantedCountry, wantedYear);
 
         for(CapacityRequest req : wantedRequests) {
             System.out.println(req);

@@ -1,6 +1,5 @@
 package group10.excel;
 
-
 public class RealisedCapacity {
   private int palletAmount;
   private Temperature temperature;
@@ -24,4 +23,13 @@ public class RealisedCapacity {
     return this.warehouse;
   }
 
+  @Override
+  public String toString() {
+    return String.format(
+        "Pallet Amount = %d, Storage Condition = %s, Warehouse = %s",
+        palletAmount,
+        temperature,
+        warehouse
+    );
+  }
 }
