@@ -171,4 +171,70 @@ class ExcelReaderTest {
         assertEquals("PS PAC I", req.getWarehouse().getName());
         assertEquals(2025, req.getYear()); // ensure your model exposes getYear()
     }
+
+     @Test
+    void skipsRowsWithRealisedCapacityZeroOrNegative() throws Exception {
+        File xlsx = makeWorkbook("Sheet1", sh -> {
+            Row r1 = sh.createRow(1);
+            r1.createCell(0).setCellValue("Denmark");   // Country
+            r1.createCell(1).setCellValue(0);           // PalletAmount
+            r1.createCell(2).setCellValue(2025);        // Year (numeric)
+            r1.createCell(3).setCellValue("Ambient");   // Temperature
+            r1.createCell(4).setCellValue("");          // ProductionSite
+            r1.createCell(5).setCellValue("PS PAC I");
+            r1.createCell(6).setCellValue(20000);
+
+            Row r2 = sh.createRow(2);                    
+            r2.createCell(0).setCellValue("DENMARK");
+            r2.createCell(1).setCellValue(0);
+            r2.createCell(2).setCellValue(2025);
+            r2.createCell(3).setCellValue("Ambient");
+            r2.createCell(4).setCellValue("");
+            r2.createCell(5).setCellValue("KN Durham 2");
+            r2.createCell(6).setCellValue(-5);
+        });
+
+        ExcelReader reader = new ExcelReader(xlsx);
+        List<RealisedCapacity> out = reader.warehouseCapacity("Denmark", 2025);
+        assertTrue(out.isEmpty(), "No rows should pass when realised capacity <= 0");
+    }
+
+     @Test
+    void skipsInvalidTemperatureForWarehouse() throws Exception {
+        File xlsx = makeWorkbook("Sheet1", sh -> {
+             Row r1 = sh.createRow(1);
+            r1.createCell(0).setCellValue("Denmark");   // Country
+            r1.createCell(1).setCellValue(0);           // PalletAmount
+            r1.createCell(2).setCellValue(2025);        // Year (numeric)
+            r1.createCell(3).setCellValue("HOT");   // Temperature
+            r1.createCell(4).setCellValue("");          // ProductionSite
+            r1.createCell(5).setCellValue("PS PAC I");
+            r1.createCell(6).setCellValue(20000);
+        });
+
+        ExcelReader reader = new ExcelReader(xlsx);
+        List<RealisedCapacity> out = reader.warehouseCapacity("Denmark", 2025);
+        assertTrue(out.isEmpty(), "Invalid temperature should be rejected");
+    }
+
+    @Test
+    void acceptsMixedCaseCountryAndTemperatureForWarehouse() throws Exception {
+        File xlsx = makeWorkbook("Sheet1", sh -> {
+           Row r1 = sh.createRow(1);
+            r1.createCell(0).setCellValue("DenMaRK");   // Country
+            r1.createCell(1).setCellValue(0);           // PalletAmount
+            r1.createCell(2).setCellValue(2025);        // Year (numeric)
+            r1.createCell(3).setCellValue("aMBienT");   // Temperature
+            r1.createCell(4).setCellValue("");          // ProductionSite
+            r1.createCell(5).setCellValue("PS PAC I");
+            r1.createCell(6).setCellValue(20000);
+        });
+
+        ExcelReader reader = new ExcelReader(xlsx);
+        List<RealisedCapacity> out = reader.warehouseCapacity("DENMARK", 2025);
+        assertEquals(1, out.size());
+        assertEquals(Temperature.AMBIENT, out.get(0).getTemperature());
+        assertEquals(2025, out.get(0).getYear());
+    }
+
 }   
