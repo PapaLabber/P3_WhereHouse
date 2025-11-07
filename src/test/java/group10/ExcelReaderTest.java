@@ -38,8 +38,7 @@ class ExcelReaderTest {
             header.createCell(3).setCellValue("Temperature");
             header.createCell(4).setCellValue("ProductionSite");
             header.createCell(5).setCellValue("Warehouse");
-            header.createCell(6).setCellValue( "L&D Capacity (Physical pallet spaces)");
-           
+            header.createCell(6).setCellValue("L&D Capacity (Physical pallet spaces)");
 
             // custom rows
             filler.fill(sh);
@@ -53,19 +52,21 @@ class ExcelReaderTest {
     }
 
     @FunctionalInterface
-    interface RowFiller { void fill(Sheet sh); }
+    interface RowFiller {
+        void fill(Sheet sh);
+    }
 
     @Test
     void filtersByCountryPalletsYear_andParsesFields() throws Exception {
         File xlsx = makeWorkbook("Sheet1", sh -> {
             Row r1 = sh.createRow(1);
-            r1.createCell(0).setCellValue("Denmark");    // Country
-            r1.createCell(1).setCellValue(250);          // PalletAmount
-            r1.createCell(2).setCellValue(2025);         // Year (numeric)
-            r1.createCell(3).setCellValue("Cold");       // Temperature
+            r1.createCell(0).setCellValue("Denmark"); // Country
+            r1.createCell(1).setCellValue(250); // PalletAmount
+            r1.createCell(2).setCellValue(2025); // Year (numeric)
+            r1.createCell(3).setCellValue("Cold"); // Temperature
             r1.createCell(4).setCellValue("Kalundborg"); // ProductionSite
 
-            Row r2 = sh.createRow(2);                    // should be filtered out (USA)
+            Row r2 = sh.createRow(2); // should be filtered out (USA)
             r2.createCell(0).setCellValue("USA");
             r2.createCell(1).setCellValue(500);
             r2.createCell(2).setCellValue(2025);
@@ -89,14 +90,14 @@ class ExcelReaderTest {
         File xlsx = makeWorkbook("Sheet1", sh -> {
             Row r1 = sh.createRow(1);
             r1.createCell(0).setCellValue("Denmark");
-            r1.createCell(1).setCellValue(0);            // <= 0 → skip
+            r1.createCell(1).setCellValue(0); // <= 0 → skip
             r1.createCell(2).setCellValue(2025);
             r1.createCell(3).setCellValue("Freeze");
             r1.createCell(4).setCellValue("Hillerød");
 
             Row r2 = sh.createRow(2);
             r2.createCell(0).setCellValue("Denmark");
-            r2.createCell(1).setCellValue(-5);           // <= 0 → skip
+            r2.createCell(1).setCellValue(-5); // <= 0 → skip
             r2.createCell(2).setCellValue(2025);
             r2.createCell(3).setCellValue("Ambient");
             r2.createCell(4).setCellValue("Kalundborg");
@@ -127,10 +128,10 @@ class ExcelReaderTest {
     void acceptsMixedCaseCountryAndTemperature() throws Exception {
         File xlsx = makeWorkbook("Sheet1", sh -> {
             Row r1 = sh.createRow(1);
-            r1.createCell(0).setCellValue("denMARK");    // mixed case
+            r1.createCell(0).setCellValue("denMARK"); // mixed case
             r1.createCell(1).setCellValue(42);
             r1.createCell(2).setCellValue(2025);
-            r1.createCell(3).setCellValue("fReeZe");     // mixed case
+            r1.createCell(3).setCellValue("fReeZe"); // mixed case
             r1.createCell(4).setCellValue("Måløv");
         });
 
@@ -140,19 +141,20 @@ class ExcelReaderTest {
         assertEquals(Temperature.FREEZE, out.get(0).getTemperature());
         assertEquals(2025, out.get(0).getYear());
     }
+
     @Test
     void filtersByYearAndCountryAndParsesFields() throws Exception {
         File xlsx = makeWorkbook("Sheet1", sh -> {
             Row r1 = sh.createRow(1);
-            r1.createCell(0).setCellValue("Denmark");   // Country
-            r1.createCell(1).setCellValue(0);           // PalletAmount
-            r1.createCell(2).setCellValue(2025);        // Year (numeric)
-            r1.createCell(3).setCellValue("Ambient");   // Temperature
-            r1.createCell(4).setCellValue("");          // ProductionSite
+            r1.createCell(0).setCellValue("Denmark"); // Country
+            r1.createCell(1).setCellValue(0); // PalletAmount
+            r1.createCell(2).setCellValue(2025); // Year (numeric)
+            r1.createCell(3).setCellValue("Ambient"); // Temperature
+            r1.createCell(4).setCellValue(""); // ProductionSite
             r1.createCell(5).setCellValue("PS PAC I");
             r1.createCell(6).setCellValue(20000);
 
-            Row r2 = sh.createRow(2);                    // should be filtered out (USA)
+            Row r2 = sh.createRow(2); // should be filtered out (USA)
             r2.createCell(0).setCellValue("USA");
             r2.createCell(1).setCellValue(0);
             r2.createCell(2).setCellValue(2025);
@@ -172,19 +174,19 @@ class ExcelReaderTest {
         assertEquals(2025, req.getYear()); // ensure your model exposes getYear()
     }
 
-     @Test
+    @Test
     void skipsRowsWithRealisedCapacityZeroOrNegative() throws Exception {
         File xlsx = makeWorkbook("Sheet1", sh -> {
             Row r1 = sh.createRow(1);
-            r1.createCell(0).setCellValue("Denmark");   // Country
-            r1.createCell(1).setCellValue(0);           // PalletAmount
-            r1.createCell(2).setCellValue(2025);        // Year (numeric)
-            r1.createCell(3).setCellValue("Ambient");   // Temperature
-            r1.createCell(4).setCellValue("");          // ProductionSite
+            r1.createCell(0).setCellValue("Denmark"); // Country
+            r1.createCell(1).setCellValue(0); // PalletAmount
+            r1.createCell(2).setCellValue(2025); // Year (numeric)
+            r1.createCell(3).setCellValue("Ambient"); // Temperature
+            r1.createCell(4).setCellValue(""); // ProductionSite
             r1.createCell(5).setCellValue("PS PAC I");
             r1.createCell(6).setCellValue(0);
 
-            Row r2 = sh.createRow(2);                    
+            Row r2 = sh.createRow(2);
             r2.createCell(0).setCellValue("DENMARK");
             r2.createCell(1).setCellValue(0);
             r2.createCell(2).setCellValue(2025);
@@ -199,15 +201,15 @@ class ExcelReaderTest {
         assertTrue(out.isEmpty(), "No rows should pass when realised capacity <= 0");
     }
 
-     @Test
+    @Test
     void skipsInvalidTemperatureForWarehouse() throws Exception {
         File xlsx = makeWorkbook("Sheet1", sh -> {
-             Row r1 = sh.createRow(1);
-            r1.createCell(0).setCellValue("Denmark");   // Country
-            r1.createCell(1).setCellValue(0);           // PalletAmount
-            r1.createCell(2).setCellValue(2025);        // Year (numeric)
-            r1.createCell(3).setCellValue("HOT");   // Temperature
-            r1.createCell(4).setCellValue("");          // ProductionSite
+            Row r1 = sh.createRow(1);
+            r1.createCell(0).setCellValue("Denmark"); // Country
+            r1.createCell(1).setCellValue(0); // PalletAmount
+            r1.createCell(2).setCellValue(2025); // Year (numeric)
+            r1.createCell(3).setCellValue("HOT"); // Temperature
+            r1.createCell(4).setCellValue(""); // ProductionSite
             r1.createCell(5).setCellValue("PS PAC I");
             r1.createCell(6).setCellValue(20000);
         });
@@ -220,12 +222,12 @@ class ExcelReaderTest {
     @Test
     void acceptsMixedCaseCountryAndTemperatureForWarehouse() throws Exception {
         File xlsx = makeWorkbook("Sheet1", sh -> {
-           Row r1 = sh.createRow(1);
-            r1.createCell(0).setCellValue("DenMaRK");   // Country
-            r1.createCell(1).setCellValue(0);           // PalletAmount
-            r1.createCell(2).setCellValue(2025);        // Year (numeric)
-            r1.createCell(3).setCellValue("aMBienT");   // Temperature
-            r1.createCell(4).setCellValue("");          // ProductionSite
+            Row r1 = sh.createRow(1);
+            r1.createCell(0).setCellValue("DenMaRK"); // Country
+            r1.createCell(1).setCellValue(0); // PalletAmount
+            r1.createCell(2).setCellValue(2025); // Year (numeric)
+            r1.createCell(3).setCellValue("aMBienT"); // Temperature
+            r1.createCell(4).setCellValue(""); // ProductionSite
             r1.createCell(5).setCellValue("PS PAC I");
             r1.createCell(6).setCellValue(20000);
         });
@@ -237,4 +239,4 @@ class ExcelReaderTest {
         assertEquals(2025, out.get(0).getYear());
     }
 
-}   
+}
