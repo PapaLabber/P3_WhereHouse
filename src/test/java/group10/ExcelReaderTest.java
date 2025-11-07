@@ -182,7 +182,7 @@ class ExcelReaderTest {
             r1.createCell(3).setCellValue("Ambient");   // Temperature
             r1.createCell(4).setCellValue("");          // ProductionSite
             r1.createCell(5).setCellValue("PS PAC I");
-            r1.createCell(6).setCellValue(20000);
+            r1.createCell(6).setCellValue(0);
 
             Row r2 = sh.createRow(2);                    
             r2.createCell(0).setCellValue("DENMARK");
