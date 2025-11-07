@@ -20,27 +20,26 @@ import group10.excel.ExcelReader;
 import group10.excel.RealisedCapacity;
 import group10.excel.Temperature;
 
+/**
+ * Test class for ExcelReader functionality
+ * Tests reading and filtering of warehouse capacity and production site
+ * requests
+ */
 class ExcelReaderTest {
-
     @TempDir
     Path tmp;
 
-    // ---- helper to create a tiny workbook per test ----
+    /**
+     * Creates a test workbook with given sheet name and content
+     * 
+     * @param sheetName Name of the sheet to create
+     * @param filler    Function to fill the sheet with data
+     * @return File object containing the created Excel workbook
+     */
     private File makeWorkbook(String sheetName, RowFiller filler) throws IOException {
         try (Workbook wb = new XSSFWorkbook()) {
             Sheet sh = wb.createSheet(sheetName);
-
-            // Header row MUST match the reader’s expectations
-            Row header = sh.createRow(0);
-            header.createCell(0).setCellValue("Country");
-            header.createCell(1).setCellValue("PalletAmount");
-            header.createCell(2).setCellValue("Year");
-            header.createCell(3).setCellValue("Temperature");
-            header.createCell(4).setCellValue("ProductionSite");
-            header.createCell(5).setCellValue("Warehouse");
-            header.createCell(6).setCellValue("L&D Capacity (Physical pallet spaces)");
-
-            // custom rows
+            createHeaderRow(sh);
             filler.fill(sh);
 
             File f = tmp.resolve("test.xlsx").toFile();
@@ -56,22 +55,15 @@ class ExcelReaderTest {
         void fill(Sheet sh);
     }
 
+    /**
+     * Tests filtering of requests by country and year while validating field
+     * parsing
+     */
     @Test
     void filtersByCountryPalletsYear_andParsesFields() throws Exception {
         File xlsx = makeWorkbook("Sheet1", sh -> {
-            Row r1 = sh.createRow(1);
-            r1.createCell(0).setCellValue("Denmark"); // Country
-            r1.createCell(1).setCellValue(250); // PalletAmount
-            r1.createCell(2).setCellValue(2025); // Year (numeric)
-            r1.createCell(3).setCellValue("Cold"); // Temperature
-            r1.createCell(4).setCellValue("Kalundborg"); // ProductionSite
-
-            Row r2 = sh.createRow(2); // should be filtered out (USA)
-            r2.createCell(0).setCellValue("USA");
-            r2.createCell(1).setCellValue(500);
-            r2.createCell(2).setCellValue(2025);
-            r2.createCell(3).setCellValue("Ambient");
-            r2.createCell(4).setCellValue("Måløv");
+            createRequestRow(sh, 1, "Denmark", 250, 2025, "Cold", "Kalundborg");
+            createRequestRow(sh, 2, "USA", 500, 2025, "Ambient", "Måløv");
         });
 
         ExcelReader reader = new ExcelReader(xlsx);
@@ -82,25 +74,17 @@ class ExcelReaderTest {
         assertEquals(250, req.getPalletAmount());
         assertEquals(Temperature.COLD, req.getTemperature());
         assertEquals("Kalundborg", req.getProductionSite().getName());
-        assertEquals(2025, req.getYear()); // ensure your model exposes getYear()
+        assertEquals(2025, req.getYear());
     }
 
+    /**
+     * Tests that rows with zero or negative pallet amounts are skipped
+     */
     @Test
     void skipsRowsWithPalletsZeroOrNegative() throws Exception {
         File xlsx = makeWorkbook("Sheet1", sh -> {
-            Row r1 = sh.createRow(1);
-            r1.createCell(0).setCellValue("Denmark");
-            r1.createCell(1).setCellValue(0); // <= 0 → skip
-            r1.createCell(2).setCellValue(2025);
-            r1.createCell(3).setCellValue("Freeze");
-            r1.createCell(4).setCellValue("Hillerød");
-
-            Row r2 = sh.createRow(2);
-            r2.createCell(0).setCellValue("Denmark");
-            r2.createCell(1).setCellValue(-5); // <= 0 → skip
-            r2.createCell(2).setCellValue(2025);
-            r2.createCell(3).setCellValue("Ambient");
-            r2.createCell(4).setCellValue("Kalundborg");
+            createRequestRow(sh, 1, "Denmark", 0, 2025, "Freeze", "Hillerød");
+            createRequestRow(sh, 2, "Denmark", -5, 2025, "Ambient", "Kalundborg");
         });
 
         ExcelReader reader = new ExcelReader(xlsx);
@@ -108,15 +92,13 @@ class ExcelReaderTest {
         assertTrue(out.isEmpty(), "No rows should pass when pallets <= 0");
     }
 
+    /**
+     * Tests that rows with invalid temperature values are skipped
+     */
     @Test
     void skipsInvalidTemperature() throws Exception {
         File xlsx = makeWorkbook("Sheet1", sh -> {
-            Row r1 = sh.createRow(1);
-            r1.createCell(0).setCellValue("Denmark");
-            r1.createCell(1).setCellValue(100);
-            r1.createCell(2).setCellValue(2025);
-            r1.createCell(3).setCellValue("Hot"); // invalid temperature value
-            r1.createCell(4).setCellValue("Hillerød");
+            createRequestRow(sh, 1, "Denmark", 100, 2025, "Hot", "Hillerød");
         });
 
         ExcelReader reader = new ExcelReader(xlsx);
@@ -124,15 +106,13 @@ class ExcelReaderTest {
         assertTrue(out.isEmpty(), "Invalid temperature should be rejected");
     }
 
+    /**
+     * Tests case-insensitive matching for country and temperature fields
+     */
     @Test
     void acceptsMixedCaseCountryAndTemperature() throws Exception {
         File xlsx = makeWorkbook("Sheet1", sh -> {
-            Row r1 = sh.createRow(1);
-            r1.createCell(0).setCellValue("denMARK"); // mixed case
-            r1.createCell(1).setCellValue(42);
-            r1.createCell(2).setCellValue(2025);
-            r1.createCell(3).setCellValue("fReeZe"); // mixed case
-            r1.createCell(4).setCellValue("Måløv");
+            createRequestRow(sh, 1, "denMARK", 42, 2025, "fReeZe", "Måløv");
         });
 
         ExcelReader reader = new ExcelReader(xlsx);
@@ -142,27 +122,17 @@ class ExcelReaderTest {
         assertEquals(2025, out.get(0).getYear());
     }
 
+    /**
+     * Tests filtering of warehouse capacity by year and country while validating
+     * field parsing
+     */
     @Test
     void filtersByYearAndCountryAndParsesFields() throws Exception {
         File xlsx = makeWorkbook("Sheet1", sh -> {
-            Row r1 = sh.createRow(1);
-            r1.createCell(0).setCellValue("Denmark"); // Country
-            r1.createCell(1).setCellValue(0); // PalletAmount
-            r1.createCell(2).setCellValue(2025); // Year (numeric)
-            r1.createCell(3).setCellValue("Ambient"); // Temperature
-            r1.createCell(4).setCellValue(""); // ProductionSite
-            r1.createCell(5).setCellValue("PS PAC I");
-            r1.createCell(6).setCellValue(20000);
-
-            Row r2 = sh.createRow(2); // should be filtered out (USA)
-            r2.createCell(0).setCellValue("USA");
-            r2.createCell(1).setCellValue(0);
-            r2.createCell(2).setCellValue(2025);
-            r2.createCell(3).setCellValue("Ambient");
-            r2.createCell(4).setCellValue("");
-            r2.createCell(5).setCellValue("KN Durham 2");
-            r2.createCell(6).setCellValue(20000);
+            createWarehouseRow(sh, 1, "Denmark", 0, 2025, "Ambient", "PS PAC I", 20000);
+            createWarehouseRow(sh, 2, "USA", 0, 2025, "Ambient", "KN Durham 2", 20000);
         });
+
         ExcelReader reader = new ExcelReader(xlsx);
         List<RealisedCapacity> output = reader.warehouseCapacity("DENMARK", 2025);
 
@@ -171,29 +141,17 @@ class ExcelReaderTest {
         assertEquals(20000, req.getPalletAmount());
         assertEquals(Temperature.AMBIENT, req.getTemperature());
         assertEquals("PS PAC I", req.getWarehouse().getName());
-        assertEquals(2025, req.getYear()); // ensure your model exposes getYear()
+        assertEquals(2025, req.getYear());
     }
 
+    /**
+     * Tests that warehouse rows with zero or negative capacity are skipped
+     */
     @Test
     void skipsRowsWithRealisedCapacityZeroOrNegative() throws Exception {
         File xlsx = makeWorkbook("Sheet1", sh -> {
-            Row r1 = sh.createRow(1);
-            r1.createCell(0).setCellValue("Denmark"); // Country
-            r1.createCell(1).setCellValue(0); // PalletAmount
-            r1.createCell(2).setCellValue(2025); // Year (numeric)
-            r1.createCell(3).setCellValue("Ambient"); // Temperature
-            r1.createCell(4).setCellValue(""); // ProductionSite
-            r1.createCell(5).setCellValue("PS PAC I");
-            r1.createCell(6).setCellValue(0);
-
-            Row r2 = sh.createRow(2);
-            r2.createCell(0).setCellValue("DENMARK");
-            r2.createCell(1).setCellValue(0);
-            r2.createCell(2).setCellValue(2025);
-            r2.createCell(3).setCellValue("Ambient");
-            r2.createCell(4).setCellValue("");
-            r2.createCell(5).setCellValue("KN Durham 2");
-            r2.createCell(6).setCellValue(-5);
+            createWarehouseRow(sh, 1, "Denmark", 0, 2025, "Ambient", "PS PAC I", 0);
+            createWarehouseRow(sh, 2, "DENMARK", 0, 2025, "Ambient", "KN Durham 2", -5);
         });
 
         ExcelReader reader = new ExcelReader(xlsx);
@@ -201,17 +159,13 @@ class ExcelReaderTest {
         assertTrue(out.isEmpty(), "No rows should pass when realised capacity <= 0");
     }
 
+    /**
+     * Tests that warehouse rows with invalid temperature values are skipped
+     */
     @Test
     void skipsInvalidTemperatureForWarehouse() throws Exception {
         File xlsx = makeWorkbook("Sheet1", sh -> {
-            Row r1 = sh.createRow(1);
-            r1.createCell(0).setCellValue("Denmark"); // Country
-            r1.createCell(1).setCellValue(0); // PalletAmount
-            r1.createCell(2).setCellValue(2025); // Year (numeric)
-            r1.createCell(3).setCellValue("HOT"); // Temperature
-            r1.createCell(4).setCellValue(""); // ProductionSite
-            r1.createCell(5).setCellValue("PS PAC I");
-            r1.createCell(6).setCellValue(20000);
+            createWarehouseRow(sh, 1, "Denmark", 0, 2025, "HOT", "PS PAC I", 20000);
         });
 
         ExcelReader reader = new ExcelReader(xlsx);
@@ -219,17 +173,13 @@ class ExcelReaderTest {
         assertTrue(out.isEmpty(), "Invalid temperature should be rejected");
     }
 
+    /**
+     * Tests case-insensitive matching for country and temperature in warehouse data
+     */
     @Test
     void acceptsMixedCaseCountryAndTemperatureForWarehouse() throws Exception {
         File xlsx = makeWorkbook("Sheet1", sh -> {
-            Row r1 = sh.createRow(1);
-            r1.createCell(0).setCellValue("DenMaRK"); // Country
-            r1.createCell(1).setCellValue(0); // PalletAmount
-            r1.createCell(2).setCellValue(2025); // Year (numeric)
-            r1.createCell(3).setCellValue("aMBienT"); // Temperature
-            r1.createCell(4).setCellValue(""); // ProductionSite
-            r1.createCell(5).setCellValue("PS PAC I");
-            r1.createCell(6).setCellValue(20000);
+            createWarehouseRow(sh, 1, "DenMaRK", 0, 2025, "aMBienT", "PS PAC I", 20000);
         });
 
         ExcelReader reader = new ExcelReader(xlsx);
@@ -239,4 +189,78 @@ class ExcelReaderTest {
         assertEquals(2025, out.get(0).getYear());
     }
 
+    // Helper Functions
+
+    /**
+     * Creates the header row with standard column names
+     * 
+     * @param sh Sheet to add header row to
+     */
+    private void createHeaderRow(Sheet sh) {
+        Row header = sh.createRow(0);
+        header.createCell(0).setCellValue("Country");
+        header.createCell(1).setCellValue("PalletAmount");
+        header.createCell(2).setCellValue("Year");
+        header.createCell(3).setCellValue("Temperature");
+        header.createCell(4).setCellValue("ProductionSite");
+        header.createCell(5).setCellValue("Warehouse");
+        header.createCell(6).setCellValue("L&D Capacity (Physical pallet spaces)");
+    }
+
+    /**
+     * Creates a row with common fields (country, pallets, year, temperature)
+     * 
+     * @param sh          Sheet to add row to
+     * @param rowNum      Row number
+     * @param country     Country name
+     * @param pallets     Number of pallets
+     * @param year        Year value
+     * @param temperature Temperature category
+     * @return Created row with common fields
+     */
+    private Row createCommonFields(Sheet sh, int rowNum, String country, int pallets, int year, String temperature) {
+        Row row = sh.createRow(rowNum);
+        row.createCell(0).setCellValue(country);
+        row.createCell(1).setCellValue(pallets);
+        row.createCell(2).setCellValue(year);
+        row.createCell(3).setCellValue(temperature);
+        return row;
+    }
+
+    /**
+     * Creates a complete capacity request row
+     * 
+     * @param sh             Sheet to add row to
+     * @param rowNum         Row number
+     * @param country        Country name
+     * @param pallets        Number of pallets
+     * @param year           Year value
+     * @param temperature    Temperature category
+     * @param productionSite Production site name
+     */
+    private void createRequestRow(Sheet sh, int rowNum, String country, int pallets,
+            int year, String temperature, String productionSite) {
+        Row row = createCommonFields(sh, rowNum, country, pallets, year, temperature);
+        row.createCell(4).setCellValue(productionSite);
+    }
+
+    /**
+     * Creates a complete warehouse capacity row
+     * 
+     * @param sh          Sheet to add row to
+     * @param rowNum      Row number
+     * @param country     Country name
+     * @param pallets     Number of pallets
+     * @param year        Year value
+     * @param temperature Temperature category
+     * @param warehouse   Warehouse name
+     * @param capacity    Warehouse capacity
+     */
+    private void createWarehouseRow(Sheet sh, int rowNum, String country, int pallets,
+            int year, String temperature, String warehouse, int capacity) {
+        Row row = createCommonFields(sh, rowNum, country, pallets, year, temperature);
+        row.createCell(4).setCellValue(""); // ProductionSite empty for warehouse
+        row.createCell(5).setCellValue(warehouse);
+        row.createCell(6).setCellValue(capacity);
+    }
 }
