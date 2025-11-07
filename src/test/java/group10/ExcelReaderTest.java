@@ -17,6 +17,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import group10.excel.CapacityRequest;
 import group10.excel.ExcelReader;
+import group10.excel.RealisedCapacity;
 import group10.excel.Temperature;
 
 class ExcelReaderTest {
@@ -36,6 +37,9 @@ class ExcelReaderTest {
             header.createCell(2).setCellValue("Year");
             header.createCell(3).setCellValue("Temperature");
             header.createCell(4).setCellValue("ProductionSite");
+            header.createCell(5).setCellValue("Warehouse");
+            header.createCell(6).setCellValue( "L&D Capacity (Physical pallet spaces)");
+           
 
             // custom rows
             filler.fill(sh);
@@ -136,4 +140,35 @@ class ExcelReaderTest {
         assertEquals(Temperature.FREEZE, out.get(0).getTemperature());
         assertEquals(2025, out.get(0).getYear());
     }
-}
+    @Test
+    void filtersByYearAndCountryAndParsesFields() throws Exception {
+        File xlsx = makeWorkbook("Sheet1", sh -> {
+            Row r1 = sh.createRow(1);
+            r1.createCell(0).setCellValue("Denmark");   // Country
+            r1.createCell(1).setCellValue(0);           // PalletAmount
+            r1.createCell(2).setCellValue(2025);        // Year (numeric)
+            r1.createCell(3).setCellValue("Ambient");   // Temperature
+            r1.createCell(4).setCellValue("");          // ProductionSite
+            r1.createCell(5).setCellValue("PS PAC I");
+            r1.createCell(6).setCellValue(20000);
+
+            Row r2 = sh.createRow(2);                    // should be filtered out (USA)
+            r2.createCell(0).setCellValue("USA");
+            r2.createCell(1).setCellValue(0);
+            r2.createCell(2).setCellValue(2025);
+            r2.createCell(3).setCellValue("Ambient");
+            r2.createCell(4).setCellValue("");
+            r2.createCell(5).setCellValue("KN Durham 2");
+            r2.createCell(6).setCellValue(20000);
+        });
+        ExcelReader reader = new ExcelReader(xlsx);
+        List<RealisedCapacity> output = reader.warehouseCapacity("DENMARK", 2025);
+
+        assertEquals(1, output.size(), "Only Denmark 2025 row should pass");
+        RealisedCapacity req = output.get(0);
+        assertEquals(20000, req.getPalletAmount());
+        assertEquals(Temperature.AMBIENT, req.getTemperature());
+        assertEquals("PS PAC I", req.getWarehouse().getName());
+        assertEquals(2025, req.getYear()); // ensure your model exposes getYear()
+    }
+}   
