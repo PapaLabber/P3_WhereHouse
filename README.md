@@ -1,2 +1,2 @@
 # P3_Inventory_Management
-blabla
+Study project for Novo Nordisk to handle forecast allocations of pre-production ingredients.
