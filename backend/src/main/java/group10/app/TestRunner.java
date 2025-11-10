@@ -11,7 +11,7 @@ import group10.excel.ExcelReader;
 import group10.excel.RealisedCapacity;
 
 
-public class Main {
+public class TestRunner {
     public static void main(String[] args) throws InvalidFormatException, IOException {
         File excelFile = new File("CapacitydataMay2025.xlsx");
         ExcelReader reader = new ExcelReader(excelFile);
