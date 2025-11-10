@@ -31,6 +31,6 @@ public class Main {
         for(RealisedCapacity cap : capacities) {
             System.out.println(cap);
         }
-      new LinearProgrammingExample().runExample();
+      new LinearProgrammingExample().LP();
     }
 }
