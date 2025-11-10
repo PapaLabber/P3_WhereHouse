@@ -1,3 +1,5 @@
+package group10.excel;
+
 public class Result {
     private Warehouse warehouse;
     private Temperature temperature;
