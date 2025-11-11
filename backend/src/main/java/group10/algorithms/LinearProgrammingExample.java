@@ -8,19 +8,20 @@ public class LinearProgrammingExample {
     public static void LP() {
       Loader.loadNativeLibraries();
       MPSolver solver = MPSolver.createSolver("GLOP");
+      if (solver == null) {
+        System.err.println("Solver not available.");
+        return;
+      }
 
       // Problem dimensions 3D
       int warehouses = 2;
       int products = 2;
       int factories = 2;
 
-      double[][][] transportCosts = {
-        {{3, 4}, {2, 6}}, // Costs from warehouse 0
-        {{5, 2}, {4, 3}}  // Costs from warehouse 1
+      double[][] transportDistances = {
+        {3, 4}, // warehouse 0 → factory 0 og 1
+        {5, 2}  // warehouse 1 → factory 0 og 1
       };
-      /* {0, 0}, {0, 1} are costs from warehouse 0 to factory 0 and 1 for product 0
-       * {1, 0}, {1, 1} are costs from warehouse 0 to factory 0 and 1 for product 1
-       */
 
       double[][] demand = {
         {30, 20}, // product 0 to factory 0 and 1
@@ -90,12 +91,12 @@ public class LinearProgrammingExample {
         }
       }
 
-          // Objective: Minimize transport cost
+    // Objective: Minimize transport cost
     MPObjective objective = solver.objective();
     for (int w = 0; w < warehouses; w++) {
       for (int p = 0; p < products; p++) {
         for (int f = 0; f < factories; f++) {
-          objective.setCoefficient(x[w][p][f], transportCosts[w][p][f]);
+          objective.setCoefficient(x[w][p][f], transportDistances[w][f]);
         }
       }
     }
@@ -126,26 +127,23 @@ public class LinearProgrammingExample {
      */
     // Output solution
     if (resultStatus == MPSolver.ResultStatus.OPTIMAL) {
-      System.out.println("Optimal transport cost = " + objective.value());
-      double totalCost = 0.0;
+      System.out.println("Optimal transportafstand (km * antal): " + objective.value());
+      double totalDistance = 0.0;
       for (int w = 0; w < warehouses; w++) {
         for (int p = 0; p < products; p++) {
           for (int f = 0; f < factories; f++) {
             double quantity = x[w][p][f].solutionValue();
             if (quantity > 0.0) {
-              double unitCost = transportCosts[w][p][f];
-              double cost = unitCost * quantity;
-              totalCost += cost;
-
-              System.out.printf(
-                "Produkt %d: %s → Fabrik %d | Antal: %.0f | Pris/stk: %.2f | Delomkostning: %.2f\n",
-                p, "Lager " + w, f, quantity, unitCost, cost
-              );
+              double distance = transportDistances[w][f];
+              double cost = distance * quantity;
+              totalDistance += cost;
+              System.out.printf("Produkt %d: Lager %d → Fabrik %d | Antal: %.0f | Afstand: %.2f km | Total: %.2f km\n",
+                  p, w, f, quantity, distance, cost);
             }
           }
         }
       }
-      System.out.printf("Samlet transportomkostning: %.2f\n", totalCost);
+      System.out.printf("Samlet transportafstand: %.2f km\n", totalDistance);
     } else {
       System.err.println("Ingen optimal løsning fundet.");
     }
