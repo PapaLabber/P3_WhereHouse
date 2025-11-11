@@ -9,7 +9,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import group10.excel.CapacityRequest;
 import group10.excel.ExcelReader;
 import group10.excel.RealisedCapacity;
-import group10.algorithms.LinearProgrammingExample;
+import group10.algorithms.LinearProgramming;
 
 public class Main {
     public static void main(String[] args) throws InvalidFormatException, IOException {
@@ -31,6 +31,6 @@ public class Main {
         for(RealisedCapacity cap : capacities) {
             System.out.println(cap);
         }
-      new LinearProgrammingExample().LP();
+      new LinearProgramming().LP();
     }
 }
