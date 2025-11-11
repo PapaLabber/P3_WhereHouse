@@ -6,6 +6,8 @@ import com.google.ortools.linearsolver.*;
 public class LinearProgrammingExample {
 
     public static void LP() {
+
+      // Initialzing OR-Tools and creating the solver.
       Loader.loadNativeLibraries();
       MPSolver solver = MPSolver.createSolver("GLOP");
       if (solver == null) {
@@ -13,36 +15,43 @@ public class LinearProgrammingExample {
         return;
       }
 
-      // Problem dimensions 3D
-      int warehouses = 2;
-      int products = 2;
-      int factories = 2;
+      // Notations from report
+      int warehouses = 2; // warehouses = W notation
+      int products = 2;   // products = P notation
+      int factories = 2;  // factories = F notation
 
-      double[][] transportDistances = {
-        {3, 4}, // warehouse 0 → factory 0 og 1
-        {5, 2}  // warehouse 1 → factory 0 og 1
+      double[][] transportDistances = { // transportDistances = T w,f notation
+        {3, 4}, // warehouse 0 to factory 0 and 1
+        {5, 2}  // warehouse 1 to factory 0 and 1
       };
 
-      double[][] demand = {
-        {30, 20}, // product 0 to factory 0 and 1
-        {10, 40}  // product 1 to factory 0 and 1
+      double[][] demand = { // demand = D p,f notation
+        {100, 10}, // product ambient 0 to factory 0 and 1
+        {60, 10},  // product cold 1 to factory 0 and 1
+        {20, 30}   // product freeze 2 to factory 0 and 1
       };
 
-      double[] warehouseCapacities = {100, 80};
+      double[][] warehouseCapacities = { // warehouseCapacities = C w notation
+        {100, 80},  // Ambient for warehouse 0 and 1
+        {80, 50},   // Cold for warehouse 0 and 1
+        {10, 50}    // Freeze for warehouse 0 and 1
+      }; 
 
-      boolean[][] compatibility = {
+      boolean[][] compatibility = { // compatibility = A w,p notation
         {true, false},
         {true, true}
       };
 
+      // Initializing baseline infinity
       double infinity = MPSolver.infinity();
+      // Initializing decision variable x
       MPVariable[][][] x = new MPVariable[warehouses][products][factories];
 
       // Define variables
       for (int w = 0; w < warehouses; w++) {
         for (int p = 0; p < products; p++) {
           for (int f = 0; f < factories; f++) {
-            // Decision variables ≥ 0.0
+            // Decision variables >= 0.0
             x[w][p][f] = solver.makeNumVar(0.0, infinity, "x[" + w + "][" + p + "][" + f + "]");
           }
         }
@@ -96,18 +105,48 @@ public class LinearProgrammingExample {
     for (int w = 0; w < warehouses; w++) {
       for (int p = 0; p < products; p++) {
         for (int f = 0; f < factories; f++) {
+          /*
+          * setCoefficent sets a number to be multiplied upon our x, this
+          * number is the transport distance from warehouse w to factory f
+          * as an example: transportDistances[w][f] * x[w][p][f]
+          */
           objective.setCoefficient(x[w][p][f], transportDistances[w][f]);
         }
       }
     }
+    // Finds the minimization for the objective with the coefficients from the previous nested for-loops
     objective.setMinimization();
 
     // Solve
     final MPSolver.ResultStatus resultStatus = solver.solve();
 
 
-    /*
-     *     if (resultStatus == MPSolver.ResultStatus.OPTIMAL) {
+
+
+    // Output solution
+    if (resultStatus == MPSolver.ResultStatus.OPTIMAL) {
+      System.out.println("Optimal cost (Distance * Allocated amount): " + objective.value());
+      double totalCost = 0.0;
+      for (int w = 0; w < warehouses; w++) {
+        for (int p = 0; p < products; p++) {
+          for (int f = 0; f < factories; f++) {
+            double currentX = x[w][p][f].solutionValue();
+            if (currentX > 0) {
+              double cost = transportDistances[w][f] * currentX; 
+              totalCost += cost;
+              System.out.printf("Product %d: Warehouse %d to Factory %d | Allocated amount: %.2f | Distance: %.2f km | Total cost: %.2f\n",
+                  p, w, f, currentX, transportDistances[w][f], totalCost);
+            }
+          }
+        }
+      }
+      System.out.printf("Combined cost: %.2f\n", totalCost); // think about
+    } else {
+      System.err.println("No optimal solution found. " + resultStatus);
+    }
+    /* Previous iteration for the above output solution
+
+    if (resultStatus == MPSolver.ResultStatus.OPTIMAL) {
       System.out.println("Optimal transport cost = " + objective.value());
       for (int w = 0; w < warehouses; w++) {
         for (int p = 0; p < products; p++) {
@@ -123,29 +162,8 @@ public class LinearProgrammingExample {
     } else {
       System.err.println("No optimal solution found.");
     }
+    */
   }
-     */
-    // Output solution
-    if (resultStatus == MPSolver.ResultStatus.OPTIMAL) {
-      System.out.println("Optimal transportafstand (km * antal): " + objective.value());
-      double totalDistance = 0.0;
-      for (int w = 0; w < warehouses; w++) {
-        for (int p = 0; p < products; p++) {
-          for (int f = 0; f < factories; f++) {
-            double quantity = x[w][p][f].solutionValue();
-            if (quantity > 0.0) {
-              double distance = transportDistances[w][f];
-              double cost = distance * quantity;
-              totalDistance += cost;
-              System.out.printf("Produkt %d: Lager %d → Fabrik %d | Antal: %.0f | Afstand: %.2f km | Total: %.2f km\n",
-                  p, w, f, quantity, distance, cost);
-            }
-          }
-        }
-      }
-      System.out.printf("Samlet transportafstand: %.2f km\n", totalDistance);
-    } else {
-      System.err.println("Ingen optimal løsning fundet.");
-    }
-  }
+
+  
 }
