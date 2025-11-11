@@ -12,30 +12,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.FileSystemResource;
 
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.catalina.connector.Response;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api")
@@ -47,7 +32,7 @@ public class Controller {
     private OutputResult outputResult;
 
     @PostMapping("/fileUpload")
-    public ResponseEntity<String> upload(@RequestParam("file") MultipartFile file,
+    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file,
             @RequestParam("wantedCountry") String wantedCountry, @RequestParam("wantedYear") int wantedYear)
             throws IOException, InvalidFormatException {
         if (file == null || file.isEmpty()) {
