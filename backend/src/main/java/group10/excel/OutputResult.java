@@ -40,7 +40,7 @@ public class OutputResult {
                 outputDir.mkdirs();
             }
 
-            File f = new File(outputDir, "allocationResult.xlsx");
+            File f = new File(outputDir, sheetName);
 
             try (FileOutputStream out = new FileOutputStream(f)) {
                 wb.write(out);
@@ -54,8 +54,8 @@ public class OutputResult {
         void fill(Sheet sh);
     }
 
-    void writeResultsToExcel(List<Result> results) throws IOException {
-        createOutputFile("Allocation Results", sh -> {
+    public void writeResultsToExcel(List<Result> results, String sheetName) throws IOException {
+        createOutputFile(sheetName, sh -> {
             int rowIndex = 1; // Start from row 1 since row 0 is header
             for (Result result : results) {
                 Row row = sh.createRow(rowIndex++);
