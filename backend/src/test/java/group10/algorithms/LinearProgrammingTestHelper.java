@@ -21,13 +21,12 @@ public class LinearProgrammingTestHelper {
      * @param warehouseCapacities capacity matrix [products][warehouses]
      * @return the result status as a string
      */
-    public static String solveLPWithData(
-            int warehouses,
-            int products,
-            int factories,
-            double[][] transportDistances,
-            double[][] demand,
-            double[][] warehouseCapacities) {
+    public static String solveLPWithData(int warehouses,
+                                         int products,
+                                         int factories,
+                                         double[][] transportDistances,
+                                         double[][] demand,
+                                         double[][] warehouseCapacities) {
 
         // Initialize OR-Tools and create solver
         Loader.loadNativeLibraries();
