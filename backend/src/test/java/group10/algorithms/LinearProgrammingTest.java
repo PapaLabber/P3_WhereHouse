@@ -62,14 +62,14 @@ class LinearProgrammingTest {
         LPTestCase tc = new LPTestCase(
             2, 3, 2,
             new double[][]{ { 3, 4 }, { 5, 2 } },                // transportDistances, warehouse 0 to factory 0 and 1 in [0][0-1]
-            new double[][]{ { 50, 0 }, { 40, 25 }, { 0, 25 } },  // demand, product 0 (ambient) to factory 0 and 1 in [0][0-1]
+            new double[][]{ { 100, 0 }, { 80, 50 }, { 0, 50 } }, // demand, product 0 (ambient) to factory 0 and 1 in [0][0-1]
             new double[][]{ { 100, 0 }, { 80, 50 }, { 50, 0 } }, // warehouseCapacities, product 0 (ambient) for warehouse 0 and 1 in [0][0-1]
             true,                               // shouldBeOptimal = true due to expected feasibility
-            150.0                           // expected cost: (50*3) + (40*3) + (25*2) + (25*5) = 150+120+50+125 = 445
+            840.0                           // expected cost: (100*3) + (80*3) + (50*2) + (50*4) = 300+240+100+200 = 840
         );
 
         String result = solveLPAndReturnStatus(tc);
-        assertEquals("OPTIMAL", result, "Expected optimal solution for feasible problem");
+        assertEquals("OPTIMAL", result, "Expected optimal solution for optimal problem");
     }
 
     /*
@@ -142,8 +142,8 @@ class LinearProgrammingTest {
             new double[][]{ { 1 }, { 10 } },    // transportDistances, warehouse 0 to factory 0 in [0][0]
             new double[][]{ { 50 } },           // demand, product 0 (ambient) to factory 0 in [0][0]
             new double[][]{ { 50, 50 } },       // product 0 (ambient) for warehouse 0 in [0][0-1]
-            true,    // shouldBeOptimal = true due to expected feasibility
-            50.0 // All from warehouse 0 at cost 1: 50*1 = 50
+            true,              // shouldBeOptimal = true due to expected feasibility
+            50.0           // All from warehouse 0 at cost 1: 50*1 = 50
         );
 
         String result = solveLPAndReturnStatus(tc);
