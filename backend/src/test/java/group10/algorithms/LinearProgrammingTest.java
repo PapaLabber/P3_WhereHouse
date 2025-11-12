@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 /*
  * Unit tests for LinearProgramming solver.
  * Tests verify that the LP solver correctly handles various scenarios:
- * - Feasible problems with optimal solutions
+ * - Optimal problems with optimal solutions
  * - Infeasible problems (supply < demand)
  * - Capacity constraints enforcement
  * - Objective value correctness
@@ -54,7 +54,7 @@ class LinearProgrammingTest {
     }
 
     /*                               
-     * Test 1: Feasible problem with exact capacity match.
+     * Test 1: Optimal problem with exact capacity match.
      * Supply equals demand; all warehouses can serve factories.
      */
     @Test
@@ -92,7 +92,7 @@ class LinearProgrammingTest {
     }
 
     /*
-     * Test 3: Single warehouse, single product, single factory (trivial case).
+     * Test 3: Optimal problem - Single warehouse, single product, single factory (trivial case).
      */
     @Test
     void testTrivialProblem_SingleDimension() {
@@ -110,7 +110,7 @@ class LinearProgrammingTest {
     }
 
     /*
-     * Test 4: Warehouse with zero capacity for a product.
+     * Test 4: Optimal problem - Warehouse with zero capacity for a product.
      * Should force demand to be met by other warehouses (if possible).
      */
     @Test
@@ -129,7 +129,7 @@ class LinearProgrammingTest {
     }
 
     /*
-     * Test 5: Multiple routes to same factory.
+     * Test 5: Optimal problem - Multiple routes to same factory.
      * Solver should choose cheapest route while respecting capacities.
      */
     @Test
@@ -151,7 +151,7 @@ class LinearProgrammingTest {
     }
 
     /*
-     * Test 6: Demand split across multiple warehouses.
+     * Test 6: Optimal problem - Demand split across multiple warehouses.
      * Solver must distribute supply to meet all demand.
      */
     @Test
