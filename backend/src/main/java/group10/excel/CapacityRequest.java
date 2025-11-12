@@ -20,34 +20,34 @@ public class CapacityRequest {
     }
 
     public int getPalletAmount() {
-        return palletAmount;
+        return this.palletAmount;
     }
 
     public Temperature getTemperature() {
-        return temperature;
+        return this.temperature;
     }
 
     public ProductionSite getProductionSite() {
-        return productionSite;
+        return this.productionSite;
     }
 
     public int getID() {
-        return ID;
+        return this.ID;
     }
 
     public int getYear() {
-        return year;
+        return this.year;
     }
 
     @Override
     public String toString() {
         return String.format(
                 "ID = %d, pallet Amount = %d, Storage Condition = %s, Production Site = %s, Year = %d",
-                ID,
-                palletAmount,
-                temperature,
-                productionSite,
-                year
+                this.ID,
+                this.palletAmount,
+                this.temperature,
+                this.productionSite,
+                this.year
         );
     }
 }

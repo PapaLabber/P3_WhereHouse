@@ -18,7 +18,7 @@ public class ProductionSite {
     private final double latitude;
 
     // Private constructor: only this class can create sites.
-    private ProductionSite(String name, double longitude, double latitude) {
+    public ProductionSite(String name, double longitude, double latitude) {
         this.name = name;
         this.longitude = longitude;
         this.latitude = latitude;
@@ -27,20 +27,20 @@ public class ProductionSite {
     // --- Public getters ---
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public double getLongitude() {
-        return longitude;
+        return this.longitude;
     }
 
     public double getLatitude() {
-        return latitude;
+        return this.latitude;
     }
 
     @Override
     public String toString() {
-        return name;
+        return this.name;
     }
 
     // --- Static registry of allowed production sites ---
@@ -78,7 +78,7 @@ public class ProductionSite {
      * Returns null if the site is unknown.
      */
     public static ProductionSite fromName(String siteName) {
-        if (siteName == null) return null;
+        if (siteName == null) return SITES.get("hillerød"); // if null it is Hillerød... Trust
         String key = siteName.trim().toLowerCase();
         return SITES.get(key);
     }

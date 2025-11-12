@@ -1,11 +1,98 @@
 package group10.algorithms;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.ortools.Loader;
-import com.google.ortools.linearsolver.*;
+import com.google.ortools.linearsolver.MPConstraint;
+import com.google.ortools.linearsolver.MPObjective;
+import com.google.ortools.linearsolver.MPSolver;
+import com.google.ortools.linearsolver.MPVariable;
+
+import group10.excel.CapacityRequest;
+import group10.excel.ProductionSite;
+import group10.excel.RealisedCapacity;
+import group10.excel.Warehouse;
 
 public class LinearProgramming {
 
-  public static void LP() {
+ static class inputLP {
+        int warehouses;
+        int products;
+        int factories;
+        double[][] transportDistances;
+        double[][] demand;
+        double[][] warehouseCapacities;
+
+        inputLP(int warehouses, int products, int factories,
+                double[][] transportDistances, double[][] demand,
+                double[][] warehouseCapacities) {
+
+            this.warehouses = warehouses;
+            this.products = products;
+            this.factories = factories;
+            this.transportDistances = transportDistances;
+            this.demand = demand;
+            this.warehouseCapacities = warehouseCapacities;
+
+        }
+    }
+
+
+  public static void LP(List<CapacityRequest> wantedRequests, List<RealisedCapacity> capacities) {
+    int warehouses = capacities.size(); // warehouses = W notation
+    int products = 3; // products = P notation ---- product amount is a constant 3 (ambient, cold, freeze)
+    int factories = 5; // factories = F notation ---- factory amount is a constant 5 (5 production sites) look ProductionSite.java for context
+
+    double[][] transportDistances = new double[warehouses][factories]; // transportDistances = T_{w,f} notation
+    List<Warehouse> warehouseArray = new ArrayList<>();
+    List<ProductionSite> siteArray = new ArrayList<>();
+    for (RealisedCapacity warehouse : capacities) {
+      for (CapacityRequest factory : wantedRequests) {
+        Warehouse W = new Warehouse(warehouse.getWarehouse().getName(), warehouse.getWarehouse().getLongitude(), warehouse.getWarehouse().getLatitude());
+        warehouseArray.add(W);
+        ProductionSite F = new ProductionSite(factory.getProductionSite().getName(), factory.getProductionSite().getLongitude(), factory.getProductionSite().getLatitude());
+        siteArray.add(F);
+        //Math.sqrt(Math.pow(longtitudeW-longtitudeF,2)+Math.pow(latitudeW-latitudeF,2));
+      }
+    }
+
+    for (int w = 0; w < warehouses; w++) { // DER ER FEJL HER <-------- !!!!!!!!!!!!!!!!!!!!!! VI ER OGSÅ NOGET TIL HER !!!!!!!!!!!!!!!!!!!!
+      for (int f = 0; f < factories; f++) {
+        double longtitudeW = warehouseArray.get(w).getLongitude();
+        double latitudeW = warehouseArray.get(w).getLatitude();
+        double longtitudeF = siteArray.get(f).getLongitude();
+        double latitudeF = siteArray.get(f).getLatitude();
+        transportDistances[w][f] = Math.sqrt(Math.pow(longtitudeW-longtitudeF,2)+Math.pow(latitudeW-latitudeF,2));
+        System.out.println(warehouseArray.get(w)+"->"+siteArray.get(f)+" dist:"+transportDistances[w][f]);
+      }
+    }
+
+/* 
+    for (RealisedCapacity cap : capacities) {
+        System.out.println(cap);
+    }
+        
+    for(CapacityRequest req : wantedRequests) {
+          System.out.println(req);
+    }*/
+  
+
+    inputLP objectInputLP = new inputLP(
+        2, 3, 2,
+        new double[][]{ { 3, 4 }, { 5, 2 } },                // transportDistances, warehouse 0 to factory 0 and 1 in [0][0-1]
+        new double[][]{ { 100, 0 }, { 80, 50 }, { 0, 50 } }, // demand, product 0 (ambient) to factory 0 and 1 in [0][0-1]
+        new double[][]{ { 100, 0 }, { 80, 50 }, { 50, 0 } } // warehouseCapacities, product 0 (ambient) for warehouse 0 and 1 in [0][0-1]
+    );
+
+
+    
+    
+    
+    //oldLP();
+  }
+
+  public static void oldLP() {
     // Initialzing OR-Tools and creating the solver.
     Loader.loadNativeLibraries();
     MPSolver solver = MPSolver.createSolver("GLOP");
@@ -118,27 +205,6 @@ public class LinearProgramming {
     } else {
       System.err.println("No optimal solution found. " + resultStatus);
     }
-    /*
-     * Previous iteration for the above output solution
-     * 
-     * if (resultStatus == MPSolver.ResultStatus.OPTIMAL) {
-     * System.out.println("Optimal transport cost = " + objective.value());
-     * for (int w = 0; w < warehouses; w++) {
-     * for (int p = 0; p < products; p++) {
-     * for (int f = 0; f < factories; f++) {
-     * double val = x[w][p][f].solutionValue();
-     * if (val > 0.0) {
-     * System.out.printf("Send %.0f stk af produkt %d fra lager %d til fabrik %d\n",
-     * val, p, w, f);
-     * }
-     * //if (val > 0.0) {System.out.printf("x[%d][%d][%d] = %.2f\n", w, p, f, val);}
-     * }
-     * }
-     * }
-     * } else {
-     * System.err.println("No optimal solution found.");
-     * }
-     */
   }
 
 }

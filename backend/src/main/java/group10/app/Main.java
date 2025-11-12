@@ -6,10 +6,10 @@ import java.util.List;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
+import group10.algorithms.LinearProgramming;
 import group10.excel.CapacityRequest;
 import group10.excel.ExcelReader;
 import group10.excel.RealisedCapacity;
-import group10.algorithms.LinearProgramming;
 
 public class Main {
     public static void main(String[] args) throws InvalidFormatException, IOException {
@@ -21,16 +21,17 @@ public class Main {
 
         // Filter for Denmark and pallet > 0
         List<CapacityRequest> wantedRequests = reader.filterRequest(wantedCountry, wantedYear);
-
+        /* 
         for(CapacityRequest req : wantedRequests) {
             System.out.println(req);
         }
-
+*/
         List<RealisedCapacity> capacities = reader.warehouseCapacity(wantedCountry, wantedYear);
-
+ /* 
         for(RealisedCapacity cap : capacities) {
             System.out.println(cap);
         }
-      new LinearProgramming().LP();
+        */
+        new LinearProgramming().LP(wantedRequests, capacities);
     }
 }

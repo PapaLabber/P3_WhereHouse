@@ -43,7 +43,7 @@ public class Warehouse {
     }
 
     public List<RealisedCapacity> getRealisedCapacities() {
-        return realisedCapacities;
+        return this.realisedCapacities;
     }
 
     public String getName() {
@@ -59,9 +59,9 @@ public class Warehouse {
         // canonical display name you want in the rest of the app.
 
         WAREHOUSES.put("ps hub",    new Warehouse("PS HUB", 12.34, 55.67));
-        WAREHOUSES.put("ps pac i",  new Warehouse("PS PAC I", 12.34, 55.67));
-        WAREHOUSES.put("ps pac ii", new Warehouse("PS PAC II", 12.34, 55.67));
-        WAREHOUSES.put("neff",      new Warehouse("NEFF", 12.34, 55.67));
+        WAREHOUSES.put("ps pac i",  new Warehouse("PS PAC I", 13.34, 56.67)); // Husk at sætte det rigtige ind
+        WAREHOUSES.put("ps pac ii", new Warehouse("PS PAC II", 14.34, 57.67));
+        WAREHOUSES.put("neff",      new Warehouse("NEFF", 15.34, 58.67));
 
         // Add more sites here if they exist in your Excel file.
         // The IMPORTANT thing is that the strings here match exactly
@@ -94,6 +94,6 @@ public class Warehouse {
     }
 @Override
 public String toString() {
-    return name; // or String.format("%s (%.5f, %.5f)", name, latitude, longitude);
+    return this.name; // or String.format("%s (%.5f, %.5f)", name, latitude, longitude);
 }
 }
