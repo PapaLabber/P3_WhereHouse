@@ -68,7 +68,7 @@ public class Controller {
 
             // Kør algoritme
 
-            String fileName = "AllocatedResult" + wantedYear + wantedCountry + ".xlsx";
+            String fileName = "AllocatedResult" + wantedYear + wantedCountry;
 
             outputResult.writeResultsToExcel(results, fileName);
 

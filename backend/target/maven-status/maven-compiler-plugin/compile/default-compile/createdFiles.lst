@@ -1,15 +1,1 @@
-group10\excel\Distance.class
-group10\excel\Temperature.class
-group10\app\BackendApplication.class
-group10\excel\Warehouse.class
-group10\excel\OutputResult.class
-group10\excel\DataValue.class
-group10\excel\ExcelReader$1.class
-group10\excel\ProductionSite.class
-group10\app\TestRunner.class
-group10\excel\CapacityRequest.class
-group10\excel\ExcelReader.class
-group10\excel\Result.class
-group10\controller\Controller.class
-group10\excel\OutputResult$RowFiller.class
-group10\excel\RealisedCapacity.class
+group10/excel/ExcelReader$1.class

@@ -53,7 +53,7 @@ public class TestRunner {
         results.add(result3);
 
         OutputResult output = new OutputResult("./outputFile");
-        Path file = output.writeResultsToExcel(results, "AllocatedResult2026DENMARK");
+        Path file = output.writeResultsToExcel(results, "AllocatedResult2027FRANCE");
         System.out.println("Wrote Excel file: " + file.toAbsolutePath());
     }
 }
