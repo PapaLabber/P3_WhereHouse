@@ -4,6 +4,22 @@ import { PromptInputs } from "./components/PromptInputs";
 import { ResultsDownload } from "./components/ResultsDownload";
 import { processData, type ProcessedResult } from "./utils/csvProcessor";
 import { Warehouse } from "lucide-react";
+import { DropdownSelect, type Option } from "./components/DropdownSelect";
+
+type Country = "DENMARK" | "SWEDEN" | "NORWAY";
+type Year = "2024" | "2025" | "2026";
+
+const COUNTRY_OPTIONS: Option<Country>[] = [
+  { label: "Denmark", value: "DENMARK" },
+  { label: "Sweden", value: "SWEDEN" },
+  { label: "Norway", value: "NORWAY", disabled: true },
+];
+
+const YEAR_OPTIONS: Option<Year>[] = [
+  { label: "2024", value: "2024" },
+  { label: "2025", value: "2025" },
+  { label: "2026", value: "2026", disabled: true },
+];
 
 export default function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -15,20 +31,46 @@ export default function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<ProcessedResult | null>(null);
 
+  const [country, setCountry] = useState<Country | null>(null);
+  const [year, setYear] = useState<Year | null>(null);
+
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
     setResult(null); // Clear previous results
   };
 
+  const API = import.meta.env.VITE_API_URL ?? ""; // e.g. "http://localhost:8080"
+
   const handleProcess = async () => {
-    if (!selectedFile || prompts.every((p) => !p.trim())) return;
+    if (!selectedFile || !country || !year) return;
 
     setIsProcessing(true);
     try {
-      const processedResult = await processData(selectedFile, prompts);
-      setResult(processedResult);
-    } catch (error) {
-      console.error("Processing failed:", error);
+      const form = new FormData();
+      form.append("file", selectedFile, selectedFile.name);
+      form.append("wantedCountry", country);
+      form.append("wantedYear", year.toString());
+
+      const res = await fetch(`${API}/api/export`, {
+        method: "POST",
+        body: form, // <-- browser sets multipart boundary automatically
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `AllocatedResult${country}${year}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Processing failed:", err);
     } finally {
       setIsProcessing(false);
     }
@@ -86,16 +128,47 @@ export default function App() {
           <div className="space-y-7">
             <div>
               <h2 className="text-xl font-semibold text-[#001965] mb-4">
-                Step 1: Upload xlsx File
+                Step 1: Filter your search
+              </h2>
+
+              <div className="grid gap-6 md:grid-cols-3">
+                <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                  <h3 className="text-[#001965] font-medium mb-2">Country</h3>
+                  <DropdownSelect
+                    label=""
+                    value={country}
+                    onChange={setCountry}
+                    options={COUNTRY_OPTIONS}
+                    placeholder="Choose a country"
+                  />
+                </div>
+
+                <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                  <h3 className="text-[#001965] font-medium mb-2">Year</h3>
+                  <DropdownSelect
+                    label=""
+                    value={year}
+                    onChange={setYear}
+                    options={YEAR_OPTIONS}
+                    placeholder="Pick a year"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-[#001965] mb-4">
+                Step 2: Upload xlsx File
               </h2>
               <FileUpload
                 onFileSelect={handleFileSelect}
                 selectedFile={selectedFile}
               />
             </div>
+
             <div>
               <h2 className="text-xl font-semibold text-[#001965] mb-4">
-                Step 2: Download Results
+                Step 3: Download Results
               </h2>
               <ResultsDownload result={result} onDownload={handleDownload} />
             </div>

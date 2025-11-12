@@ -22,7 +22,7 @@ export function generateCsv(data: string[][]): string {
 // Mock processing function for prototype
 export async function processData(
   csvFile: File, 
-  prompts: [string, string, string]
+  prompts: [string, string]
 ): Promise<ProcessedResult> {
   // Simulate processing delay
   await new Promise(resolve => setTimeout(resolve, 2000));

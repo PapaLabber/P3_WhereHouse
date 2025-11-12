@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -17,8 +18,10 @@ import org.springframework.core.io.FileSystemResource;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import java.io.IOException;
+
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +34,7 @@ public class Controller {
     @Autowired
     private OutputResult outputResult;
 
-    @PostMapping("/fileUpload")
+    @PostMapping("/export")
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file,
             @RequestParam("wantedCountry") String wantedCountry, @RequestParam("wantedYear") int wantedYear)
             throws IOException, InvalidFormatException {
@@ -48,8 +51,12 @@ public class Controller {
                     .body("Invalid file. Please upload an .xlsx file.");
         }
 
+        String fileName = "AllocatedResult" + wantedYear + wantedCountry + ".xlsx";
+        File tempFile = null;
+        Path pathOfFile;
+
         try {
-            File tempFile = File.createTempFile("upload-", ".xlsx");
+            tempFile = File.createTempFile("upload-", ".xlsx");
             file.transferTo(tempFile);
 
             ExcelReader reader = new ExcelReader(tempFile);
@@ -68,38 +75,30 @@ public class Controller {
 
             // Kør algoritme
 
-            String fileName = "AllocatedResult" + wantedYear + wantedCountry;
-
-            outputResult.writeResultsToExcel(results, fileName);
-
-            tempFile.delete();
+            pathOfFile = outputResult.writeResultsToExcel(results, fileName);
 
         } catch (IOException e) {
             return ResponseEntity
                     .status(500)
                     .body("Error while processing file.");
+        } finally {
+            if (tempFile != null && tempFile.exists()) {
+            tempFile.delete();
+        }
         }
 
-        return ResponseEntity
-                .ok("OK");
-    }
-
-    @GetMapping("/downloadFile")
-    public ResponseEntity<?> download(@RequestParam String fileName) {
-        File file = new File(outputDirPath, fileName);
-
-        if (!file.exists()) {
-            return ResponseEntity
-                    .notFound()
-                    .build();
+        Resource resource = new FileSystemResource(pathOfFile);
+        if (!resource.exists()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Output file not found after processing.");
         }
-
-        Resource resource = new FileSystemResource(file);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                .header(HttpHeaders.CONTENT_TYPE,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
-                .contentLength(file.length())
+                .contentLength(resource.contentLength())
                 .body(resource);
     }
+
 }

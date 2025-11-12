@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback } from "react";
 import { Upload, FileText } from 'lucide-react';
 import { Card } from './ui/card';
 
@@ -11,9 +11,9 @@ export function FileUpload({ onFileSelect, selectedFile }: FileUploadProps) {
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const files = Array.from(e.dataTransfer.files);
-    const csvFile = files.find(file => file.name.endsWith('.csv'));
-    if (csvFile) {
-      onFileSelect(csvFile);
+    const xlsxFile = files.find(file => file.name.endsWith('.xlsx'));
+    if (xlsxFile) {
+      onFileSelect(xlsxFile);
     }
   }, [onFileSelect]);
 
