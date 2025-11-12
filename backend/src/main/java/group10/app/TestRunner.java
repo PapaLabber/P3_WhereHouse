@@ -3,6 +3,9 @@ package group10.app;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +15,6 @@ import group10.excel.ExcelReader;
 import group10.excel.RealisedCapacity;
 import group10.excel.OutputResult;
 import group10.excel.Result;
-import java.util.ArrayList;
 import group10.excel.Temperature;
 import group10.excel.Warehouse;
 
@@ -50,8 +52,8 @@ public class TestRunner {
         results.add(result2);
         results.add(result3);
 
-        OutputResult outputresult = new OutputResult();
-
-        outputresult.writeResultsToExcel(results, "output.xlsx");
+        OutputResult output = new OutputResult("./outputFile");
+        Path file = output.writeResultsToExcel(results, "AllocatedResult2026DENMARK");
+        System.out.println("Wrote Excel file: " + file.toAbsolutePath());
     }
 }

@@ -3,7 +3,10 @@ package group10.excel;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -16,7 +19,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class OutputResult {
     @Value("${app.output-dir}")
-    private String outputDirPath;
+    private final String outputDirPath;
+
+    public OutputResult(@Value("${app.output-dir:./outputFile}") String outputDirPath) {
+        this.outputDirPath = (outputDirPath == null || outputDirPath.isBlank()) ? "./outputFile" : outputDirPath;
+    }
+
+    public OutputResult() {
+        this("./outputFile");
+    }
 
     private File createOutputFile(String sheetName, RowFiller filler) throws IOException {
         try (Workbook wb = new XSSFWorkbook()) {
@@ -38,14 +49,19 @@ public class OutputResult {
             return f;
         }
     }
-    
+
     @FunctionalInterface
     interface RowFiller {
         void fill(Sheet sh);
     }
 
-    public void writeResultsToExcel(List<Result> results, String sheetName) throws IOException {
-        createOutputFile(sheetName, sh -> {
+    public Path writeResultsToExcel(List<Result> results, String fileName) throws IOException {
+        if (!fileName.endsWith(".xlsx")) fileName += ".xlsx";
+        Path outDir = Paths.get("./outputFile");
+        Files.createDirectories(outDir);
+        Path outFile = outDir.resolve(fileName);
+        
+        createOutputFile(fileName, sh -> {
             int rowIndex = 1; // Start from row 1 since row 0 is header
             for (Result result : results) {
                 Row row = sh.createRow(rowIndex++);
@@ -59,15 +75,14 @@ public class OutputResult {
                 amountStoredCell.setCellValue(result.getAmountStored());
             }
         });
+        return outFile;
     }
-
-
 
     private void createOutputHeaderRow(Sheet sh) {
         Row header = sh.createRow(0);
         header.createCell(0).setCellValue("Warehouse");
         header.createCell(1).setCellValue("Storage Condition");
         header.createCell(2).setCellValue("Amount Stored");
-        
+
     }
 }

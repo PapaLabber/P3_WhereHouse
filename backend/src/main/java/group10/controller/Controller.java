@@ -80,7 +80,8 @@ public class Controller {
                     .body("Error while processing file.");
         }
 
-        return ResponseEntity.ok("OK");
+        return ResponseEntity
+                .ok("OK");
     }
 
     @GetMapping("/downloadFile")
