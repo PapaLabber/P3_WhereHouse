@@ -4,17 +4,28 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import group10.excel.CapacityRequest;
 import group10.excel.ExcelReader;
 import group10.excel.RealisedCapacity;
+import group10.excel.OutputResult;
+import group10.excel.Result;
+import java.util.ArrayList;
+import group10.excel.Temperature;
+import group10.excel.Warehouse;
 
 
 public class TestRunner {
+
+    @Autowired
+        private OutputResult outputresult;
     public static void main(String[] args) throws InvalidFormatException, IOException {
         File excelFile = new File("CapacitydataMay2025.xlsx");
         ExcelReader reader = new ExcelReader(excelFile);
+
 
         String wantedCountry = "DENMARK"; // Skal ændres til at være dynamisk
         int wantedYear = 2026;            // Skal ændres til at være dynamisk
@@ -31,5 +42,24 @@ public class TestRunner {
         for(RealisedCapacity cap : capacities) {
             System.out.println(cap);
         }
+
+        List<Result> results = new ArrayList<>();
+        Warehouse neff = new Warehouse("NEFF", 12, 55);
+        Warehouse pspaci = new Warehouse("PS PAC I", 12, 55);
+        Warehouse kalundborg = new Warehouse("PS WH KA", 12, 55);
+
+        Result result1 = new Result(neff, Temperature.AMBIENT, 100);
+        Result result2 = new Result(pspaci, Temperature.AMBIENT, 100);
+        Result result3 = new Result(kalundborg, Temperature.AMBIENT, 100);
+
+        results.add(result1);
+        results.add(result2);
+        results.add(result3);
+
+        OutputResult outputresult = new OutputResult();
+        
+        outputresult.writeResultsToExcel(results, "output.xlsx");
     }
 }
+
+
