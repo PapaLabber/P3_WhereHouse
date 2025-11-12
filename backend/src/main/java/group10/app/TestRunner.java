@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,31 +16,26 @@ import java.util.ArrayList;
 import group10.excel.Temperature;
 import group10.excel.Warehouse;
 
-
 public class TestRunner {
-
-    @Autowired
-        private OutputResult outputresult;
     public static void main(String[] args) throws InvalidFormatException, IOException {
-        File excelFile = new File("CapacitydataMay2025.xlsx");
-        ExcelReader reader = new ExcelReader(excelFile);
+        // File excelFile = new File("CapacitydataMay2025.xlsx");
+        // ExcelReader reader = new ExcelReader(excelFile);
 
+        // String wantedCountry = "DENMARK"; // Skal ændres til at være dynamisk
+        // int wantedYear = 2026; // Skal ændres til at være dynamisk
 
-        String wantedCountry = "DENMARK"; // Skal ændres til at være dynamisk
-        int wantedYear = 2026;            // Skal ændres til at være dynamisk
+        // // Filter for Denmark and pallet > 0
+        // List<CapacityRequest> wantedRequests = reader.filterRequest(wantedCountry, wantedYear);
 
-        // Filter for Denmark and pallet > 0
-        List<CapacityRequest> wantedRequests = reader.filterRequest(wantedCountry, wantedYear);
+        // for (CapacityRequest req : wantedRequests) {
+        //     System.out.println(req);
+        // }
 
-        for(CapacityRequest req : wantedRequests) {
-            System.out.println(req);
-        }
+        // List<RealisedCapacity> capacities = reader.warehouseCapacity(wantedCountry, wantedYear);
 
-        List<RealisedCapacity> capacities = reader.warehouseCapacity(wantedCountry, wantedYear);
-
-        for(RealisedCapacity cap : capacities) {
-            System.out.println(cap);
-        }
+        // for (RealisedCapacity cap : capacities) {
+        //     System.out.println(cap);
+        // }
 
         List<Result> results = new ArrayList<>();
         Warehouse neff = new Warehouse("NEFF", 12, 55);
@@ -57,9 +51,7 @@ public class TestRunner {
         results.add(result3);
 
         OutputResult outputresult = new OutputResult();
-        
+
         outputresult.writeResultsToExcel(results, "output.xlsx");
     }
 }
-
-
