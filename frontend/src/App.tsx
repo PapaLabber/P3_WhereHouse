@@ -37,9 +37,11 @@ export default function App() {
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
     setResult(null); // Clear previous results
+
+    if(country && year) handleProcess();
   };
 
-  const API = import.meta.env.VITE_API_URL ?? ""; // e.g. "http://localhost:8080"
+  const API = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
   const handleProcess = async () => {
     if (!selectedFile || !country || !year) return;
