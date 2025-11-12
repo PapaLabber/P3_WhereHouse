@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "TestRunner",
+            "request": "launch",
+            "mainClass": "group10.app.TestRunner",
+            "projectName": "backend"
+        },
+        {
+            "type": "java",
+            "name": "BackendApplication",
+            "request": "launch",
+            "mainClass": "group10.app.BackendApplication",
+            "projectName": "backend"
+        }
+    ]
+}

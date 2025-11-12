@@ -1,30 +1,34 @@
 FROM eclipse-temurin:17-jdk-jammy AS build
 WORKDIR /app
 
-# copy maven wrapper + pom
+# copy maven wrapper + root and module poms so parent POM can be resolved
 COPY pom.xml .
-COPY mvnw .
-COPY .mvn .mvn
+COPY backend/mvnw .
+COPY backend/.mvn .mvn
+COPY backend/pom.xml backend/pom.xml
 
 # fix line endings and permissions for mvnw
 RUN chmod +x mvnw && \
     sed -i 's/\r$//' mvnw
 
-# download dependencies
-RUN ./mvnw -q -DskipTests dependency:go-offline
+# download dependencies for the backend module (parent POM is resolved via relativePath)
+RUN ./mvnw -q -f backend/pom.xml -DskipTests dependency:go-offline
 
-# now copy source
-COPY src ./src
+# copy the full project after dependencies are cached
+COPY . .
 
-# build jar
-RUN ./mvnw clean package -DskipTests
+# build the backend module
+RUN ./mvnw -q -pl backend -am clean package -DskipTests
 
 # runtime image
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
 
-# 👇 Add this line — copy your Excel file from backend/ into /app/
-COPY CapacitydataMay2025.xlsx /app/CapacitydataMay2025.xlsx
+# ensure output directory exists inside the container
+RUN mkdir -p /app/outputFile
+
+# copy the built backend jar (module build places artifacts under backend/target)
+# use wildcard to tolerate versioned names; excludes *.original
+COPY --from=build /app/backend/target/*.jar app.jar
 
 ENTRYPOINT ["java", "-Xmx2g", "-XX:+UseG1GC", "-XX:+UseStringDeduplication", "-jar", "/app/app.jar"]
