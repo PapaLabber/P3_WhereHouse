@@ -21,18 +21,18 @@ public class LinearProgramming {
         int products;
         int factories;
         double[][] transportDistances;
-        double[][] demand;
+        List<CapacityRequest> wantedRequests;
         double[][] warehouseCapacities;
 
         inputLP(int warehouses, int products, int factories,
-                double[][] transportDistances, double[][] demand,
+                double[][] transportDistances, List<CapacityRequest> wantedRequests,
                 double[][] warehouseCapacities) {
 
             this.warehouses = warehouses;
             this.products = products;
             this.factories = factories;
             this.transportDistances = transportDistances;
-            this.demand = demand;
+            this.wantedRequests = wantedRequests;
             this.warehouseCapacities = warehouseCapacities;
 
         }
@@ -54,22 +54,41 @@ public class LinearProgramming {
     int factories = siteArray.size(); // updating factories to fit the dynamic amount for the year
     double[][] transportDistances = findTransportDistances(warehouseArray, siteArray, warehouses, factories);
 
+    warehouseArray = sortWarehouseArrayWithoutLose(capacities);
+    warehouses = warehouseArray.size(); // updating warehouses to fit the dynamic amount for the year
 
-
-
-
+  
+    
     inputLP objectInputLP = new inputLP(
+        warehouses, products, factories,
+        transportDistances,                // transportDistances, warehouse 0 to factory 0 and 1 in [0][0-1]
+        wantedRequests,   // Demand fra mock, burde være vores capacity requests (behøver ikke at være akkumuleret pr. warehouse)
+        new double[][]{ { 100, 0 }, { 80, 50 }, { 50, 0 } }  // warehouseCapacities, product 0 (ambient) for warehouse 0 and 1 in [0][0-1]
+    );
+
+
+/* 
+    inputLP objectInputLPtest = new inputLP(
         2, 3, 2,
         new double[][]{ { 3, 4 }, { 5, 2 } },                // transportDistances, warehouse 0 to factory 0 and 1 in [0][0-1]
         new double[][]{ { 100, 0 }, { 80, 50 }, { 0, 50 } }, // demand, product 0 (ambient) to factory 0 and 1 in [0][0-1]
         new double[][]{ { 100, 0 }, { 80, 50 }, { 50, 0 } }  // warehouseCapacities, product 0 (ambient) for warehouse 0 and 1 in [0][0-1]
     );
-
+*/
 
     
     
     
     //oldLP();
+  }
+
+  private static List<Warehouse> sortWarehouseArrayWithoutLose(List<RealisedCapacity> capacities) {
+    List<Warehouse> warehouseArray = new ArrayList<>();
+
+    for (RealisedCapacity warehouse : capacities) {
+      // TODO: This is for warehouseCapacities ... Probably find a new way to store the capacity data
+    }
+    return warehouseArray;
   }
 
   private static List<Warehouse> sortWarehouseArray(List<RealisedCapacity> capacities) {
