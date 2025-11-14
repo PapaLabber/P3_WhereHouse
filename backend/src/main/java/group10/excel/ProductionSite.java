@@ -18,12 +18,12 @@ public class ProductionSite {
     private final double latitude;
 
     // Private constructor: only this class can create sites.
-    public ProductionSite(String name, double longitude, double latitude) {
+    private ProductionSite(String name, double longitude, double latitude) {
         this.name = name;
         this.longitude = longitude;
         this.latitude = latitude;
     }
-
+    
     // --- Public getters ---
 
     public String getName() {

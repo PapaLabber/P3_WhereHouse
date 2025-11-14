@@ -40,28 +40,33 @@ public class LinearProgramming {
 
 
   public static void LP(List<CapacityRequest> wantedRequests, List<RealisedCapacity> capacities) {
-    int warehouses = capacities.size(); // warehouses = W notation
+    int warehouses = capacities.size(); // warehouses = W notation --- is dynamic but will initialize to capacities.size should be changed later
     int products = 3; // products = P notation ---- product amount is a constant 3 (ambient, cold, freeze)
-    int factories = 5; // factories = F notation ---- factory amount is a constant 5 (5 production sites) look ProductionSite.java for context
+    int factories = 5; // factories = F notation ---- is dynamic but will initialize to 5 should be changed later
 
     double[][] transportDistances = new double[warehouses][factories]; // transportDistances = T_{w,f} notation
     List<Warehouse> warehouseArray = new ArrayList<>();
     List<ProductionSite> siteArray = new ArrayList<>();
     for (RealisedCapacity warehouse : capacities) {
-      Warehouse W = new Warehouse(warehouse.getWarehouse().getName(), warehouse.getWarehouse().getLongitude(), warehouse.getWarehouse().getLatitude());
+      Warehouse W = Warehouse.fromName(warehouse.getWarehouse().getName());
       if (warehouseArray.contains(W) == false) {
         warehouseArray.add(W);
+        
       }
-      System.out.println("W: "+W);
+      System.out.println("W: "+warehouse);
     }
+
     for (CapacityRequest factory : wantedRequests) {
-      ProductionSite F = new ProductionSite(factory.getProductionSite().getName(), factory.getProductionSite().getLongitude(), factory.getProductionSite().getLatitude());
+      ProductionSite F = ProductionSite.fromName(factory.getProductionSite().getName());
+
       if (siteArray.contains(F) == false) {
         siteArray.add(F);
+        System.out.println("F: name: "+F.getName()+" long: "+F.getLongitude()+" lat: "+F.getLatitude());
       }
-      System.out.println("F: name: "+F.getName()+" long: "+F.getLongitude()+" lat: "+F.getLatitude());
-
     }
+    
+    warehouses = warehouseArray.size(); // updating warehouses to fit the dynamic amount for the year
+    factories = siteArray.size(); // updating factories to fit the dynamic amount for the year
 
     for (int w = 0; w < warehouses; w++) { // DER ER FEJL HER <-------- !!!!!!!!!!!!!!!!!!!!!! VI ER OGSÅ NOGET TIL HER !!!!!!!!!!!!!!!!!!!!
       for (int f = 0; f < factories; f++) {
