@@ -38,62 +38,34 @@ public class LinearProgramming {
         }
     }
 
+  
+
+
 
   public static void LP(List<CapacityRequest> wantedRequests, List<RealisedCapacity> capacities) {
     int warehouses = capacities.size(); // warehouses = W notation --- is dynamic but will initialize to capacities.size should be changed later
     int products = 3; // products = P notation ---- product amount is a constant 3 (ambient, cold, freeze)
     int factories = 5; // factories = F notation ---- is dynamic but will initialize to 5 should be changed later
 
-    double[][] transportDistances = new double[warehouses][factories]; // transportDistances = T_{w,f} notation
-    List<Warehouse> warehouseArray = new ArrayList<>();
-    List<ProductionSite> siteArray = new ArrayList<>();
-    for (RealisedCapacity warehouse : capacities) {
-      Warehouse W = Warehouse.fromName(warehouse.getWarehouse().getName());
-      if (warehouseArray.contains(W) == false) {
-        warehouseArray.add(W);
-        
-      }
-      System.out.println("W: "+warehouse);
-    }
+    //double[][] transportDistances = new double[warehouses][factories]; // transportDistances = T_{w,f} notation
 
-    for (CapacityRequest factory : wantedRequests) {
-      ProductionSite F = ProductionSite.fromName(factory.getProductionSite().getName());
 
-      if (siteArray.contains(F) == false) {
-        siteArray.add(F);
-        System.out.println("F: name: "+F.getName()+" long: "+F.getLongitude()+" lat: "+F.getLatitude());
-      }
-    }
-    
+
+    List<Warehouse> warehouseArray = sortWarehouseArray(capacities);
+    List<ProductionSite> siteArray = sortProductionSiteArray(wantedRequests);
     warehouses = warehouseArray.size(); // updating warehouses to fit the dynamic amount for the year
     factories = siteArray.size(); // updating factories to fit the dynamic amount for the year
+    double[][] transportDistances = findTransportDistances(warehouseArray, siteArray, warehouses, factories);
 
-    for (int w = 0; w < warehouses; w++) { // DER ER FEJL HER <-------- !!!!!!!!!!!!!!!!!!!!!! VI ER OGSÅ NOGET TIL HER !!!!!!!!!!!!!!!!!!!!
-      for (int f = 0; f < factories; f++) {
-        double longtitudeW = warehouseArray.get(w).getLongitude();
-        double latitudeW = warehouseArray.get(w).getLatitude();
-        double longtitudeF = siteArray.get(f).getLongitude();
-        double latitudeF = siteArray.get(f).getLatitude();
-        transportDistances[w][f] = Math.sqrt(Math.pow(longtitudeW-longtitudeF,2)+Math.pow(latitudeW-latitudeF,2));
-        //System.out.println(warehouseArray.get(w)+"->"+w+" "+f+siteArray.get(f)+" dist:"+transportDistances[w][f]);
-      }
-    }
 
-/* 
-    for (RealisedCapacity cap : capacities) {
-        System.out.println(cap);
-    }
-        
-    for(CapacityRequest req : wantedRequests) {
-          System.out.println(req);
-    }*/
-  
+
+
 
     inputLP objectInputLP = new inputLP(
         2, 3, 2,
         new double[][]{ { 3, 4 }, { 5, 2 } },                // transportDistances, warehouse 0 to factory 0 and 1 in [0][0-1]
         new double[][]{ { 100, 0 }, { 80, 50 }, { 0, 50 } }, // demand, product 0 (ambient) to factory 0 and 1 in [0][0-1]
-        new double[][]{ { 100, 0 }, { 80, 50 }, { 50, 0 } } // warehouseCapacities, product 0 (ambient) for warehouse 0 and 1 in [0][0-1]
+        new double[][]{ { 100, 0 }, { 80, 50 }, { 50, 0 } }  // warehouseCapacities, product 0 (ambient) for warehouse 0 and 1 in [0][0-1]
     );
 
 
@@ -102,6 +74,51 @@ public class LinearProgramming {
     
     //oldLP();
   }
+
+  private static List<Warehouse> sortWarehouseArray(List<RealisedCapacity> capacities) {
+    List<Warehouse> warehouseArray = new ArrayList<>();
+
+    for (RealisedCapacity warehouse : capacities) {
+      Warehouse W = Warehouse.fromName(warehouse.getWarehouse().getName());
+      if (warehouseArray.contains(W) == false) {
+        warehouseArray.add(W);
+        System.out.println("W: "+W);
+      }
+    }
+    return warehouseArray;
+  }
+
+  private static List<ProductionSite> sortProductionSiteArray(List<CapacityRequest> wantedRequests) {
+    List<ProductionSite> siteArray = new ArrayList<>();
+
+    for (CapacityRequest factory : wantedRequests) {
+      ProductionSite F = ProductionSite.fromName(factory.getProductionSite().getName());
+      if (siteArray.contains(F) == false) {
+        siteArray.add(F);
+        System.out.println("F: name: "+F.getName()+" long: "+F.getLongitude()+" lat: "+F.getLatitude());
+      }
+    }
+    return siteArray;
+  }
+
+  private static double[][] findTransportDistances(List<Warehouse> warehouseArray, List<ProductionSite> siteArray, int warehouses, int factories) {
+    double[][] transportDistances = new double[warehouses][factories]; // transportDistances = T_{w,f} notation
+
+    for (int w = 0; w < warehouses; w++) {
+      for (int f = 0; f < factories; f++) {
+        double longtitudeW = warehouseArray.get(w).getLongitude();
+        double latitudeW = warehouseArray.get(w).getLatitude();
+        double longtitudeF = siteArray.get(f).getLongitude();
+        double latitudeF = siteArray.get(f).getLatitude();
+        transportDistances[w][f] = Math.sqrt(Math.pow(longtitudeW-longtitudeF,2)+Math.pow(latitudeW-latitudeF,2));
+        System.out.println(warehouseArray.get(w)+"->"+siteArray.get(f)+" dist:"+transportDistances[w][f]);
+      }
+    }
+    return transportDistances;
+  }
+
+
+
 
   public static void oldLP() {
     // Initialzing OR-Tools and creating the solver.
