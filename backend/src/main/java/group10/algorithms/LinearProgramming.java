@@ -43,18 +43,15 @@ public class LinearProgramming {
 
 
   public static void LP(List<CapacityRequest> wantedRequests, List<RealisedCapacity> capacities) {
-    int warehouses = capacities.size(); // warehouses = W notation --- is dynamic but will initialize to capacities.size should be changed later
+    
+    
     int products = 3; // products = P notation ---- product amount is a constant 3 (ambient, cold, freeze)
-    int factories = 5; // factories = F notation ---- is dynamic but will initialize to 5 should be changed later
-
-    //double[][] transportDistances = new double[warehouses][factories]; // transportDistances = T_{w,f} notation
-
 
 
     List<Warehouse> warehouseArray = sortWarehouseArray(capacities);
     List<ProductionSite> siteArray = sortProductionSiteArray(wantedRequests);
-    warehouses = warehouseArray.size(); // updating warehouses to fit the dynamic amount for the year
-    factories = siteArray.size(); // updating factories to fit the dynamic amount for the year
+    int warehouses = warehouseArray.size(); // updating warehouses to fit the dynamic amount for the year
+    int factories = siteArray.size(); // updating factories to fit the dynamic amount for the year
     double[][] transportDistances = findTransportDistances(warehouseArray, siteArray, warehouses, factories);
 
 
