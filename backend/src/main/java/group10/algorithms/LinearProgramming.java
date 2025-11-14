@@ -48,13 +48,19 @@ public class LinearProgramming {
     List<Warehouse> warehouseArray = new ArrayList<>();
     List<ProductionSite> siteArray = new ArrayList<>();
     for (RealisedCapacity warehouse : capacities) {
-      for (CapacityRequest factory : wantedRequests) {
-        Warehouse W = new Warehouse(warehouse.getWarehouse().getName(), warehouse.getWarehouse().getLongitude(), warehouse.getWarehouse().getLatitude());
+      Warehouse W = new Warehouse(warehouse.getWarehouse().getName(), warehouse.getWarehouse().getLongitude(), warehouse.getWarehouse().getLatitude());
+      if (warehouseArray.contains(W) == false) {
         warehouseArray.add(W);
-        ProductionSite F = new ProductionSite(factory.getProductionSite().getName(), factory.getProductionSite().getLongitude(), factory.getProductionSite().getLatitude());
-        siteArray.add(F);
-        //Math.sqrt(Math.pow(longtitudeW-longtitudeF,2)+Math.pow(latitudeW-latitudeF,2));
       }
+      System.out.println("W: "+W);
+    }
+    for (CapacityRequest factory : wantedRequests) {
+      ProductionSite F = new ProductionSite(factory.getProductionSite().getName(), factory.getProductionSite().getLongitude(), factory.getProductionSite().getLatitude());
+      if (siteArray.contains(F) == false) {
+        siteArray.add(F);
+      }
+      System.out.println("F: name: "+F.getName()+" long: "+F.getLongitude()+" lat: "+F.getLatitude());
+
     }
 
     for (int w = 0; w < warehouses; w++) { // DER ER FEJL HER <-------- !!!!!!!!!!!!!!!!!!!!!! VI ER OGSÅ NOGET TIL HER !!!!!!!!!!!!!!!!!!!!
@@ -64,7 +70,7 @@ public class LinearProgramming {
         double longtitudeF = siteArray.get(f).getLongitude();
         double latitudeF = siteArray.get(f).getLatitude();
         transportDistances[w][f] = Math.sqrt(Math.pow(longtitudeW-longtitudeF,2)+Math.pow(latitudeW-latitudeF,2));
-        System.out.println(warehouseArray.get(w)+"->"+siteArray.get(f)+" dist:"+transportDistances[w][f]);
+        //System.out.println(warehouseArray.get(w)+"->"+w+" "+f+siteArray.get(f)+" dist:"+transportDistances[w][f]);
       }
     }
 
