@@ -1,9 +1,9 @@
 package group10.algorithms;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.LinkedHashMap;
 
 import com.google.ortools.Loader;
 import com.google.ortools.linearsolver.MPConstraint;
@@ -14,8 +14,8 @@ import com.google.ortools.linearsolver.MPVariable;
 import group10.excel.CapacityRequest;
 import group10.excel.ProductionSite;
 import group10.excel.RealisedCapacity;
-import group10.excel.Warehouse;
 import group10.excel.Temperature;
+import group10.excel.Warehouse;
 
 public class LinearProgramming {
 
@@ -28,7 +28,8 @@ public class LinearProgramming {
         List<CapacityRequest> wantedRequests;
         double[][] warehouseCapacities;
 
-        inputLP(int warehouses, int products, int factories, double[][] transportDistances, List<CapacityRequest> wantedRequests, double[][] warehouseCapacities) {
+        inputLP(int warehouses, int products, int factories, double[][] transportDistances,
+                List<CapacityRequest> wantedRequests, double[][] warehouseCapacities) {
             this.warehouses = warehouses;
             this.products = products;
             this.factories = factories;
@@ -50,6 +51,12 @@ public class LinearProgramming {
         double[][] transportDistances = findTransportDistances(warehouseArray, siteArray, uniqueWarehouseAmount, uniqueFactoryAmount);
 
         double[][] accumulatedWarehouseCapacities = warehouseCapacityMatrix(capacities, uniqueProductAmount, warehouseArray, uniqueWarehouseAmount);
+        for (int p = 0; p < uniqueProductAmount; p++) {
+            for (int w = 0; w < uniqueWarehouseAmount; w++) {
+                System.out.println("C[" + p + "][" + w + "]=" + accumulatedWarehouseCapacities[p][w]);
+            }
+        }
+
 
         inputLP objectInputLP = new inputLP(
                 uniqueWarehouseAmount, uniqueProductAmount, uniqueFactoryAmount,
@@ -68,7 +75,8 @@ public class LinearProgramming {
         // oldLP();
     }
 
-    private static double[][] warehouseCapacityMatrix(List<RealisedCapacity> capacities, int uniqueProductAmount, List<Warehouse> warehouseArray, int uniqueWarehouseAmount) {
+    private static double[][] warehouseCapacityMatrix(List<RealisedCapacity> capacities, int uniqueProductAmount,
+            List<Warehouse> warehouseArray, int uniqueWarehouseAmount) {
         double[][] matrix = new double[uniqueProductAmount][uniqueWarehouseAmount];
 
         // map warehouse name -> column index
@@ -129,8 +137,10 @@ public class LinearProgramming {
         return siteArray;
     }
 
-    private static double[][] findTransportDistances(List<Warehouse> warehouseArray, List<ProductionSite> siteArray, int uniqueWarehouseAmount, int uniqueFactoryAmount) {
-        double[][] transportDistances = new double[uniqueWarehouseAmount][uniqueFactoryAmount]; // transportDistances = T_{w,f} notation
+    private static double[][] findTransportDistances(List<Warehouse> warehouseArray, List<ProductionSite> siteArray,
+            int uniqueWarehouseAmount, int uniqueFactoryAmount) {
+        double[][] transportDistances = new double[uniqueWarehouseAmount][uniqueFactoryAmount]; // transportDistances =
+                                                                                                // T_{w,f} notation
 
         for (int w = 0; w < uniqueWarehouseAmount; w++) {
             for (int f = 0; f < uniqueFactoryAmount; f++) {
@@ -138,8 +148,10 @@ public class LinearProgramming {
                 double latitudeW = warehouseArray.get(w).getLatitude();
                 double longtitudeF = siteArray.get(f).getLongitude();
                 double latitudeF = siteArray.get(f).getLatitude();
-                transportDistances[w][f] = Math.sqrt(Math.pow(longtitudeW - longtitudeF, 2) + Math.pow(latitudeW - latitudeF, 2));
-                System.out.println(warehouseArray.get(w) + "->" + siteArray.get(f) + " dist:" + transportDistances[w][f]);
+                transportDistances[w][f] = Math
+                        .sqrt(Math.pow(longtitudeW - longtitudeF, 2) + Math.pow(latitudeW - latitudeF, 2));
+                System.out
+                        .println(warehouseArray.get(w) + "->" + siteArray.get(f) + " dist:" + transportDistances[w][f]);
             }
         }
         return transportDistances;
@@ -160,20 +172,20 @@ public class LinearProgramming {
         int factories = 2; // factories = F notation
 
         double[][] transportDistances = { // transportDistances = T_{w,f} notation
-            {3, 4}, // warehouse 0 to factory 0 and 1
-            {5, 2} // warehouse 1 to factory 0 and 1
+                { 3, 4 }, // warehouse 0 to factory 0 and 1
+                { 5, 2 } // warehouse 1 to factory 0 and 1
         };
 
         double[][] demand = { // demand = D_{p,f} notation
-            {50, 0}, // product 0 (ambient) to factory 0 and 1
-            {40, 25}, // product 1 (cold) to factory 0 and 1
-            {0, 25} // product 2 (freeze) to factory 0 and 1
+                { 50, 0 }, // product 0 (ambient) to factory 0 and 1
+                { 40, 25 }, // product 1 (cold) to factory 0 and 1
+                { 0, 25 } // product 2 (freeze) to factory 0 and 1
         };
 
         double[][] warehouseCapacities = { // warehouseCapacities = C_{p,w} notation
-            {100, 0}, // product 0 (ambient) for warehouse 0 and 1
-            {80, 50}, // product 1 (cold) for warehouse 0 and 1
-            {50, 0} // product 2 (freeze) for warehouse 0 and 1
+                { 100, 0 }, // product 0 (ambient) for warehouse 0 and 1
+                { 80, 50 }, // product 1 (cold) for warehouse 0 and 1
+                { 50, 0 } // product 2 (freeze) for warehouse 0 and 1
         };
 
         // Initializing baseline infinity
@@ -197,8 +209,7 @@ public class LinearProgramming {
             for (int w = 0; w < warehouses; w++) {
                 double capacity = warehouseCapacities[p][w];
                 // sum_f x[w][p][f] <= capacity
-                MPConstraint capacityConstraint
-                        = solver.makeConstraint(0.0, capacity, "capacity_p" + p + "_w" + w);
+                MPConstraint capacityConstraint = solver.makeConstraint(0.0, capacity, "capacity_p" + p + "_w" + w);
                 for (int f = 0; f < factories; f++) {
                     capacityConstraint.setCoefficient(x[w][p][f], 1);
                 }
@@ -209,8 +220,8 @@ public class LinearProgramming {
         for (int p = 0; p < products; p++) {
             for (int f = 0; f < factories; f++) {
                 // Tight constraint: supply = demand.
-                MPConstraint demandConstraint
-                        = solver.makeConstraint(demand[p][f], demand[p][f], "demand_" + p + "_" + f);
+                MPConstraint demandConstraint = solver.makeConstraint(demand[p][f], demand[p][f],
+                        "demand_" + p + "_" + f);
                 for (int w = 0; w < warehouses; w++) {
                     demandConstraint.setCoefficient(x[w][p][f], 1);
                 }
@@ -223,15 +234,18 @@ public class LinearProgramming {
             for (int p = 0; p < products; p++) {
                 for (int f = 0; f < factories; f++) {
                     /*
-           * setCoefficent sets a number to be multiplied upon our x, this number is the transport
-           * distance from warehouse w to factory f as an example: transportDistances[w][f] *
-           * x[w][p][f]
+                     * setCoefficent sets a number to be multiplied upon our x, this number is the
+                     * transport
+                     * distance from warehouse w to factory f as an example:
+                     * transportDistances[w][f] *
+                     * x[w][p][f]
                      */
                     objective.setCoefficient(x[w][p][f], transportDistances[w][f]);
                 }
             }
         }
-        // Finds the minimization for the objective with the coefficients from the previous nested for-loops
+        // Finds the minimization for the objective with the coefficients from the
+        // previous nested for-loops
         objective.setMinimization();
 
         // Solve
