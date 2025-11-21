@@ -21,21 +21,23 @@ public class LinearProgramming {
 
     static class inputLP {
 
-        int warehouses;
-        int products;
-        int factories;
+        int uniqueWarehouseAmount;
+        int uniqueProductAmount;
+        int uniqueFactoryAmount;
         double[][] transportDistances;
         List<CapacityRequest> wantedRequests;
-        double[][] warehouseCapacities;
+        List<List<Integer>> demandIDs;
+        double[][] accumulatedWarehouseCapacities;
 
-        inputLP(int warehouses, int products, int factories, double[][] transportDistances,
-                List<CapacityRequest> wantedRequests, double[][] warehouseCapacities) {
-            this.warehouses = warehouses;
-            this.products = products;
-            this.factories = factories;
+        inputLP(int uniqueWarehouseAmount, int uniqueProductAmount, int uniqueFactoryAmount, double[][] transportDistances,
+                List<CapacityRequest> wantedRequests, List<List<Integer>> demandIDs, double[][] accumulatedWarehouseCapacities) {
+            this.uniqueWarehouseAmount = uniqueWarehouseAmount;
+            this.uniqueProductAmount = uniqueProductAmount;
+            this.uniqueFactoryAmount = uniqueFactoryAmount;
             this.transportDistances = transportDistances;
             this.wantedRequests = wantedRequests;
-            this.warehouseCapacities = warehouseCapacities;
+            this.demandIDs = demandIDs;
+            this.accumulatedWarehouseCapacities = accumulatedWarehouseCapacities;
         }
     }
 
@@ -47,35 +49,26 @@ public class LinearProgramming {
         int uniqueWarehouseAmount = warehouseArray.size(); // defining the amount of unique warehouse names
         int uniqueFactoryAmount = siteArray.size(); // defining the amount of unique factory names
 
-        // Find distances between warehouses and factories
+        // 1. Find distances between warehouses and factories
         double[][] transportDistances = findTransportDistances(warehouseArray, siteArray, uniqueWarehouseAmount, uniqueFactoryAmount);
 
+        // 2. Find the total warehouse capacities for each product
         double[][] accumulatedWarehouseCapacities = warehouseCapacityMatrix(capacities, uniqueProductAmount, warehouseArray, uniqueWarehouseAmount);
-        for (int p = 0; p < uniqueProductAmount; p++) {
-            for (int w = 0; w < uniqueWarehouseAmount; w++) {
-                System.out.println("C[" + p + "][" + w + "]=" + accumulatedWarehouseCapacities[p][w]);
-            }
-        }
 
+        // 3. Find the demands per product:
+        List<List<Integer>> demandIDs = demandMatrix(wantedRequests);
 
+        // 4. Setup LP algorithm parameters
         inputLP objectInputLP = new inputLP(
                 uniqueWarehouseAmount, uniqueProductAmount, uniqueFactoryAmount,
                 transportDistances, // transportDistances, warehouse 0 to factory 0 and 1 in [0][0-1]
-                wantedRequests,
+                wantedRequests, // list of capacity request objects
+                demandIDs, // demand, product [0 - 2] vs demand ID [0 - ...]
                 accumulatedWarehouseCapacities // warehouseCapacities, product 0 (ambient) for warehouse 0 and 1 in [0][0-1]
         );
 
-        for(CapacityRequest cr : wantedRequests){
-            System.out.println("CR: " + cr);
-        }
-
-        List<List<Integer>> demand = demandMatrix(wantedRequests);
-
-        for (int p = 0; p < uniqueProductAmount; p++) { 
-            for (int f = 0; f < demand.get(p).size(); f++) {
-                System.out.println("D[" + p + "][" + f + "]=" + demand.get(p).get(f));
-            }
-        }
+        // 5. Run LP algorithm
+        LPAlgo(objectInputLP);
 
 
         /*
@@ -85,7 +78,6 @@ public class LinearProgramming {
      * double[][]{ { 100, 0 }, { 80, 50 }, { 50, 0 } } // warehouseCapacities, product 0 (ambient)
      * for warehouse 0 and 1 in [0][0-1] );
          */
-        // oldLP();
     }
 
     private static List<List<Integer>> demandMatrix(List<CapacityRequest> wantedRequests) {
@@ -113,7 +105,7 @@ public class LinearProgramming {
             }
         }
 
-      return List.of(ambient, cold, freeze);
+        return List.of(ambient, cold, freeze);
     }
 
     private static double[][] warehouseCapacityMatrix(List<RealisedCapacity> capacities, int uniqueProductAmount,
@@ -181,7 +173,7 @@ public class LinearProgramming {
     private static double[][] findTransportDistances(List<Warehouse> warehouseArray, List<ProductionSite> siteArray,
             int uniqueWarehouseAmount, int uniqueFactoryAmount) {
         double[][] transportDistances = new double[uniqueWarehouseAmount][uniqueFactoryAmount]; // transportDistances =
-                                                                                                // T_{w,f} notation
+        // T_{w,f} notation
 
         for (int w = 0; w < uniqueWarehouseAmount; w++) {
             for (int f = 0; f < uniqueFactoryAmount; f++) {
@@ -196,6 +188,110 @@ public class LinearProgramming {
             }
         }
         return transportDistances;
+    }
+
+
+    public static void LPAlgo(inputLP objectInputLP) {
+        // Initialzing OR-Tools and creating the solver.
+        Loader.loadNativeLibraries();
+        MPSolver solver = MPSolver.createSolver("GLOP");
+        if (solver == null) {
+            System.err.println("Solver not available.");
+            return;
+        }
+
+        // Initializing baseline infinity
+        double infinity = MPSolver.infinity();
+        // Initializing decision variable x
+        MPVariable[][][] x = new MPVariable[objectInputLP.uniqueWarehouseAmount][objectInputLP.uniqueProductAmount][objectInputLP.uniqueFactoryAmount];
+
+        // Define variables
+        for (int w = 0; w < objectInputLP.uniqueWarehouseAmount; w++) {
+            for (int p = 0; p < objectInputLP.uniqueProductAmount; p++) {
+                for (int f = 0; f < objectInputLP.uniqueFactoryAmount; f++) {
+                    // Decision variables >= 0.0
+                    x[w][p][f] = solver.makeNumVar(0.0, infinity, "x[" + w + "][" + p + "][" + f + "]");
+                }
+            }
+        }
+
+        // Capacity constraints per (warehouse, product)
+        // warehouseCapacities is double[][] with dimensions [products][warehouses]
+        for (int p = 0; p < objectInputLP.uniqueProductAmount; p++) {
+            for (int w = 0; w < objectInputLP.uniqueWarehouseAmount; w++) {
+                double capacity = objectInputLP.accumulatedWarehouseCapacities[p][w];
+                // sum_f x[w][p][f] <= capacity
+                MPConstraint capacityConstraint = solver.makeConstraint(0.0, capacity, "capacity_p" + p + "_w" + w);
+                for (int f = 0; f < objectInputLP.uniqueFactoryAmount; f++) {
+                    capacityConstraint.setCoefficient(x[w][p][f], 1);
+                }
+            }
+        }
+
+        // Demand constraints per product and factory
+        for (int p = 0; p < objectInputLP.uniqueProductAmount; p++) {
+            for (int i = 0; i < objectInputLP.demandIDs.get(p).size(); i++) {
+                // Tight constraint: supply = demand.
+                int palletAmountForID;
+                for (int j = 0; j < objectInputLP.wantedRequests.size(); j++){
+                    if (objectInputLP.demandIDs.get(p).get(i) == objectInputLP.wantedRequests.get(j).getID()){
+                        palletAmountForID = objectInputLP.wantedRequests.get(j).getPalletAmount();
+                        break;
+                    }
+                }
+
+                MPConstraint demandConstraint = solver.makeConstraint(palletAmountForID, palletAmountForID, "demand_" + p + "_" + i);
+                for (int w = 0; w < objectInputLP.uniqueWarehouseAmount; w++) {
+                    demandConstraint.setCoefficient(x[w][p][i], 1);
+                }
+            }
+        }
+
+        // Objective: Minimize transport cost
+        MPObjective objective = solver.objective();
+        for (int w = 0; w < objectInputLP.uniqueWarehouseAmount; w++) {
+            for (int p = 0; p < objectInputLP.uniqueProductAmount; p++) {
+                for (int f = 0; f < objectInputLP.uniqueFactoryAmount; f++) {
+                    /*
+                     * setCoefficent sets a number to be multiplied upon our x, this number is the
+                     * transport
+                     * distance from warehouse w to factory f as an example:
+                     * transportDistances[w][f] *
+                     * x[w][p][f]
+                     */
+                    objective.setCoefficient(x[w][p][f], objectInputLP.transportDistances[w][f]);
+                }
+            }
+        }
+        // Finds the minimization for the objective with the coefficients from the
+        // previous nested for-loops
+        objective.setMinimization();
+
+        // Solve
+        final MPSolver.ResultStatus resultStatus = solver.solve();
+
+        // Output solution
+        if (resultStatus == MPSolver.ResultStatus.OPTIMAL) {
+            System.out.println("Optimal cost (Distance * Allocated amount): " + objective.value());
+            double totalCost = 0.0;
+            for (int w = 0; w < objectInputLP.uniqueWarehouseAmount; w++) {
+                for (int p = 0; p < objectInputLP.uniqueProductAmount; p++) {
+                    for (int f = 0; f < objectInputLP.uniqueFactoryAmount; f++) {
+                        double currentX = x[w][p][f].solutionValue();
+                        if (currentX > 0) {
+                            double cost = objectInputLP.transportDistances[w][f] * currentX;
+                            totalCost += cost; // TODO: Delete dat shiiiit
+                            System.out.printf(
+                                    "Product %d: Warehouse %d to Factory %d | Allocated amount: %.2f | Distance: %.2f km | Cost: %.2f\n",
+                                    p, w, f, currentX, objectInputLP.transportDistances[w][f], cost);
+                        }
+                    }
+                }
+            }
+            System.out.printf("Combined cost: %.2f\n", totalCost); // think about
+        } else {
+            System.err.println("No optimal solution found. " + resultStatus);
+        }
     }
 
     public static void oldLP() {
@@ -213,20 +309,20 @@ public class LinearProgramming {
         int factories = 2; // factories = F notation
 
         double[][] transportDistances = { // transportDistances = T_{w,f} notation
-                { 3, 4 }, // warehouse 0 to factory 0 and 1
-                { 5, 2 } // warehouse 1 to factory 0 and 1
+            {3, 4}, // warehouse 0 to factory 0 and 1
+            {5, 2} // warehouse 1 to factory 0 and 1
         };
 
         double[][] demand = { // demand = D_{p,f} notation
-                { 50, 0 }, // product 0 (ambient) to factory 0 and 1
-                { 40, 25 }, // product 1 (cold) to factory 0 and 1
-                { 0, 25 } // product 2 (freeze) to factory 0 and 1
+            {50, 0}, // product 0 (ambient) to factory 0 and 1
+            {40, 25}, // product 1 (cold) to factory 0 and 1
+            {0, 25} // product 2 (freeze) to factory 0 and 1
         };
 
         double[][] warehouseCapacities = { // warehouseCapacities = C_{p,w} notation
-                { 100, 0 }, // product 0 (ambient) for warehouse 0 and 1
-                { 80, 50 }, // product 1 (cold) for warehouse 0 and 1
-                { 50, 0 } // product 2 (freeze) for warehouse 0 and 1
+            {100, 0}, // product 0 (ambient) for warehouse 0 and 1
+            {80, 50}, // product 1 (cold) for warehouse 0 and 1
+            {50, 0} // product 2 (freeze) for warehouse 0 and 1
         };
 
         // Initializing baseline infinity
