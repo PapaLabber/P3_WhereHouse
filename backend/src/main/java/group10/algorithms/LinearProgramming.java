@@ -1,6 +1,7 @@
 package group10.algorithms;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,12 @@ public class LinearProgramming {
                 accumulatedWarehouseCapacities // warehouseCapacities, product 0 (ambient) for warehouse 0 and 1 in [0][0-1]
         );
 
+        for(CapacityRequest cr : wantedRequests){
+            System.out.println("CR: " + cr);
+        }
+
+        double[][] demand = demandMatrix(wantedRequests, uniqueProductAmount);
+
         /*
      * inputLP objectInputLPtest = new inputLP( 2, 3, 2, new double[][]{ { 3, 4 }, { 5, 2 } }, //
      * transportDistances, warehouse 0 to factory 0 and 1 in [0][0-1] new double[][]{ { 100, 0 }, {
@@ -73,6 +80,35 @@ public class LinearProgramming {
      * for warehouse 0 and 1 in [0][0-1] );
          */
         // oldLP();
+    }
+
+    private static double[][] demandMatrix(List<CapacityRequest> wantedRequests, int uniqueProductAmount) {
+      double[][] matrix = new double[uniqueProductAmount][wantedRequests.size()];
+
+
+      for (wantedRequests wr : wantedRequests) {
+        
+        String name = wr.getWarehouse().getName();
+        Integer col = indexByName.get(name);
+        int amount = rc.getPalletAmount();
+        Temperature temp = rc.getTemperature();
+
+        switch (temp) {
+            case AMBIENT:
+                matrix[0][col] += amount;
+                break;
+            case COLD:
+                matrix[1][col] += amount;
+                break;
+            case FREEZE:
+                matrix[2][col] += amount;
+                break;
+            default:
+                // unknown temperature: ignore
+                break;
+        }
+    }
+      return matrix;
     }
 
     private static double[][] warehouseCapacityMatrix(List<RealisedCapacity> capacities, int uniqueProductAmount,
