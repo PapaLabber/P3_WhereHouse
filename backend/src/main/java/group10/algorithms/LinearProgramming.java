@@ -1,7 +1,6 @@
 package group10.algorithms;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +69,14 @@ public class LinearProgramming {
             System.out.println("CR: " + cr);
         }
 
-        double[][] demand = demandMatrix(wantedRequests, uniqueProductAmount);
+        List<List<Integer>> demand = demandMatrix(wantedRequests);
+
+        for (int p = 0; p < uniqueProductAmount; p++) { 
+            for (int f = 0; f < demand.get(p).size(); f++) {
+                System.out.println("D[" + p + "][" + f + "]=" + demand.get(p).get(f));
+            }
+        }
+
 
         /*
      * inputLP objectInputLPtest = new inputLP( 2, 3, 2, new double[][]{ { 3, 4 }, { 5, 2 } }, //
@@ -82,33 +88,32 @@ public class LinearProgramming {
         // oldLP();
     }
 
-    private static double[][] demandMatrix(List<CapacityRequest> wantedRequests, int uniqueProductAmount) {
-      double[][] matrix = new double[uniqueProductAmount][wantedRequests.size()];
+    private static List<List<Integer>> demandMatrix(List<CapacityRequest> wantedRequests) {
+        List<Integer> ambient = new ArrayList<>();
+        List<Integer> cold = new ArrayList<>();
+        List<Integer> freeze = new ArrayList<>();
 
+        for (CapacityRequest wr : wantedRequests) {
+            Temperature temp = wr.getTemperature();
+            int ID = wr.getID();
 
-      for (wantedRequests wr : wantedRequests) {
-        
-        String name = wr.getWarehouse().getName();
-        Integer col = indexByName.get(name);
-        int amount = rc.getPalletAmount();
-        Temperature temp = rc.getTemperature();
-
-        switch (temp) {
-            case AMBIENT:
-                matrix[0][col] += amount;
-                break;
-            case COLD:
-                matrix[1][col] += amount;
-                break;
-            case FREEZE:
-                matrix[2][col] += amount;
-                break;
-            default:
-                // unknown temperature: ignore
-                break;
+            switch (temp) {
+                case AMBIENT:
+                    ambient.add((int) ID);
+                    break;
+                case COLD:
+                    cold.add((int) ID);
+                    break;
+                case FREEZE:
+                    freeze.add((int) ID);
+                    break;
+                default:
+                    // unknown temperature: ignore
+                    break;
+            }
         }
-    }
-      return matrix;
+
+      return List.of(ambient, cold, freeze);
     }
 
     private static double[][] warehouseCapacityMatrix(List<RealisedCapacity> capacities, int uniqueProductAmount,
