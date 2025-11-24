@@ -240,10 +240,10 @@ public class LinearProgramming {
                     }
                 }
 
-                MPConstraint demandConstraint = solver.makeConstraint(palletAmountForID, palletAmountForID, "demand_" + p + "_" + i);
+/*                 MPConstraint demandConstraint = solver.makeConstraint(palletAmountForID, palletAmountForID, "demand_" + p + "_" + i);
                 for (int w = 0; w < objectInputLP.uniqueWarehouseAmount; w++) {
                     demandConstraint.setCoefficient(x[w][p][i], 1);
-                }
+                } */
             }
         }
 
