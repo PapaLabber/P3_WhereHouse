@@ -1,12 +1,12 @@
 package group10.excel;
 
-public class RealisedCapacity {
+public class RealizedCapacity {
   private int palletAmount;
   private Temperature temperature;
   private Warehouse warehouse;
   private int year;
 
-  public RealisedCapacity(int palletAmount, Temperature temperature, Warehouse warehouse, int year) {
+  public RealizedCapacity(int palletAmount, Temperature temperature, Warehouse warehouse, int year) {
     this.palletAmount = palletAmount;
     this.temperature = temperature;
     this.warehouse = warehouse;
@@ -25,7 +25,7 @@ public class RealisedCapacity {
     return this.warehouse;
   }
 
-    public int getYear() {
+  public int getYear() {
     return this.year;
   }
 
@@ -35,7 +35,6 @@ public class RealisedCapacity {
         "Pallet Amount = %d, Storage Condition = %s, Warehouse = %s",
         palletAmount,
         temperature,
-        warehouse
-    );
+        warehouse);
   }
 }

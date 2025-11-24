@@ -39,7 +39,7 @@ public class ExcelReader {
 
     public ExcelReader(File excelFile) throws InvalidFormatException, IOException {
         this.workbook = new XSSFWorkbook(excelFile); // open .xlsx
-        this.sheet = workbook.getSheetAt(0);         // first sheet only
+        this.sheet = workbook.getSheetAt(0); // first sheet only
     }
 
     public List<CapacityRequest> filterRequest(String wantedCountry, int wantedYear) throws IOException {
@@ -100,8 +100,7 @@ public class ExcelReader {
                     zone,
                     site,
                     ID,
-                    year
-            );
+                    year);
 
             // G. Keep it
             result.add(req);
@@ -111,7 +110,7 @@ public class ExcelReader {
         return result;
     }
 
-    public List<RealisedCapacity> warehouseCapacity(String wantedCountry, int wantedYear) throws IOException {
+    public List<RealizedCapacity> warehouseCapacity(String wantedCountry, int wantedYear) throws IOException {
         Iterator<Row> it = sheet.iterator();
         if (!it.hasNext()) { // no rows at all
             workbook.close();
@@ -121,7 +120,7 @@ public class ExcelReader {
         Row headerRow = it.next();
         Map<String, Integer> colIndex = getHeaderIndexMap(headerRow);
 
-        List<RealisedCapacity> result = new ArrayList<>();
+        List<RealizedCapacity> result = new ArrayList<>();
 
         while (it.hasNext()) {
             Row row = it.next();
@@ -167,12 +166,11 @@ public class ExcelReader {
             }
 
             // Build domain object
-            RealisedCapacity req = new RealisedCapacity(
+            RealizedCapacity req = new RealizedCapacity(
                     pallets,
                     zone,
                     warehouse,
-                    year
-            );
+                    year);
 
             // G. Keep it
             result.add(req);
@@ -219,7 +217,7 @@ public class ExcelReader {
                 if (n == Math.floor(n)) {
                     return String.valueOf((long) n); // "42"
                 } else {
-                    return String.valueOf(n);        // "42.5"
+                    return String.valueOf(n); // "42.5"
                 }
 
             case BOOLEAN:

@@ -37,7 +37,7 @@ export function ResultsDownload({ result, onDownload }: ResultsDownloadProps) {
           <CheckCircle className="h-6 w-6 text-green-500" />
           <h3 className="text-lg font-semibold text-[#001965]">Processing Complete</h3>
         </div>
-        
+
         <div className="space-y-2">
           <p className="text-sm text-gray-600">
             <span className="font-medium">Records processed:</span> {result.recordCount}

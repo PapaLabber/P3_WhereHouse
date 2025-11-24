@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import group10.excel.CapacityRequest;
 import group10.excel.ExcelReader;
-import group10.excel.RealisedCapacity;
+import group10.excel.RealizedCapacity;
 import group10.excel.OutputResult;
 import group10.excel.Result;
 import group10.excel.Temperature;
@@ -33,9 +33,9 @@ public class TestRunner {
         //     System.out.println(req);
         // }
 
-        // List<RealisedCapacity> capacities = reader.warehouseCapacity(wantedCountry, wantedYear);
+        // List<RealizedCapacity> capacities = reader.warehouseCapacity(wantedCountry, wantedYear);
 
-        // for (RealisedCapacity cap : capacities) {
+        // for (RealizedCapacity cap : capacities) {
         //     System.out.println(cap);
         // }
 

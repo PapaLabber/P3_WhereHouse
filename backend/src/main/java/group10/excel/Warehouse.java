@@ -10,7 +10,7 @@ public class Warehouse {
     private String name;
     private double longitude;
     private double latitude;
-    private List<RealisedCapacity> realisedCapacities = new ArrayList<>();
+    private List<RealizedCapacity> realizedCapacities = new ArrayList<>();
 
     public Warehouse(String name, double longitude, double latitude) {
         this.name = name;
@@ -26,8 +26,8 @@ public class Warehouse {
         this.latitude = latitude;
     }
 
-    public void addRealisedCapacity(RealisedCapacity rc) {
-        realisedCapacities.add(rc);
+    public void addRealizedCapacity(RealizedCapacity rc) {
+        realizedCapacities.add(rc);
     }
 
     public void setName(String name) {
@@ -42,8 +42,8 @@ public class Warehouse {
         return this.latitude;
     }
 
-    public List<RealisedCapacity> getRealisedCapacities() {
-        return realisedCapacities;
+    public List<RealizedCapacity> getRealizedCapacities() {
+        return realizedCapacities;
     }
 
     public String getName() {
@@ -58,10 +58,10 @@ public class Warehouse {
         // The string we pass into the ProductionSite constructor is the
         // canonical display name you want in the rest of the app.
 
-        WAREHOUSES.put("ps hub",    new Warehouse("PS HUB", 12.34, 55.67));
-        WAREHOUSES.put("ps pac i",  new Warehouse("PS PAC I", 12.34, 55.67));
+        WAREHOUSES.put("ps hub", new Warehouse("PS HUB", 12.34, 55.67));
+        WAREHOUSES.put("ps pac i", new Warehouse("PS PAC I", 12.34, 55.67));
         WAREHOUSES.put("ps pac ii", new Warehouse("PS PAC II", 12.34, 55.67));
-        WAREHOUSES.put("neff",      new Warehouse("NEFF", 12.34, 55.67));
+        WAREHOUSES.put("neff", new Warehouse("NEFF", 12.34, 55.67));
 
         // Add more sites here if they exist in your Excel file.
         // The IMPORTANT thing is that the strings here match exactly
@@ -92,8 +92,9 @@ public class Warehouse {
         String key = warehouseName.trim().toLowerCase();
         return WAREHOUSES.containsKey(key);
     }
-@Override
-public String toString() {
-    return name; // or String.format("%s (%.5f, %.5f)", name, latitude, longitude);
-}
+
+    @Override
+    public String toString() {
+        return name; // or String.format("%s (%.5f, %.5f)", name, latitude, longitude);
+    }
 }

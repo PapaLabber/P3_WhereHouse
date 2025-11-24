@@ -43,7 +43,7 @@ export function FileUpload({ onFileSelect, selectedFile }: FileUploadProps) {
           onChange={handleFileInput}
           className="hidden"
         />
-        
+
         {selectedFile ? (
           <div className="flex items-center justify-center space-x-2">
             <FileText className="h-8 w-8 text-[#001965]" />

@@ -38,7 +38,7 @@ export default function App() {
     setSelectedFile(file);
     setResult(null); // Clear previous results
 
-    if(country && year) handleProcess();
+    if (country && year) handleProcess();
   };
 
   const API = import.meta.env.VITE_API_URL ?? "http://localhost:3000";

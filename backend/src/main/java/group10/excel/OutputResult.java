@@ -56,11 +56,12 @@ public class OutputResult {
     }
 
     public Path writeResultsToExcel(List<Result> results, String fileName) throws IOException {
-        if (!fileName.endsWith(".xlsx")) fileName += ".xlsx";
+        if (!fileName.endsWith(".xlsx"))
+            fileName += ".xlsx";
         Path outDir = Paths.get("./outputFile");
         Files.createDirectories(outDir);
         Path outFile = outDir.resolve(fileName);
-        
+
         createOutputFile(fileName, sh -> {
             int rowIndex = 1; // Start from row 1 since row 0 is header
             for (Result result : results) {

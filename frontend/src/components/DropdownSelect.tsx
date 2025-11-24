@@ -88,9 +88,8 @@ export function DropdownSelect<T extends string>({
                   key={o.value}
                   role="option"
                   aria-selected={selected}
-                  className={`flex cursor-pointer items-center justify-between rounded-md px-2 py-2 text-sm hover:bg-gray-100 ${
-                    o.disabled ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`flex cursor-pointer items-center justify-between rounded-md px-2 py-2 text-sm hover:bg-gray-100 ${o.disabled ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   onClick={() => {
                     if (o.disabled) return;
                     onChange(o.value);

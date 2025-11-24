@@ -54,9 +54,8 @@ public class OutputResultTest {
         });
 
         try (
-            FileInputStream fileInputStream = new FileInputStream(xlsx);
-            Workbook wb = new XSSFWorkbook(fileInputStream);
-        ) {
+                FileInputStream fileInputStream = new FileInputStream(xlsx);
+                Workbook wb = new XSSFWorkbook(fileInputStream);) {
             Sheet sheet = wb.getSheetAt(0);
 
             Row header = sheet.getRow(0);

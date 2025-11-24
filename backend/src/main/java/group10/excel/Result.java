@@ -25,8 +25,8 @@ public class Result {
 
     @Override
     public String toString() {
-        return "Result [warehouse=" + warehouse + ", temperature=" + temperature + ", amountStored=" + amountStored + "]";
+        return "Result [warehouse=" + warehouse + ", temperature=" + temperature + ", amountStored=" + amountStored
+                + "]";
     }
 
-    
 }

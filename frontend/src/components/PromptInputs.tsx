@@ -28,7 +28,7 @@ export function PromptInputs({ prompts, setPrompts, onProcess, isProcessing, dis
 
   const promptLabels = [
     'Data Filter Specification 1',
-    'Data Filter Specification 2', 
+    'Data Filter Specification 2',
     'Data Filter Specification 3'
   ];
 
@@ -45,7 +45,7 @@ export function PromptInputs({ prompts, setPrompts, onProcess, isProcessing, dis
           <h2 className="text-xl font-semibold text-[#001965] mb-2">Data Processing Specifications</h2>
           <p className="text-sm text-gray-600">Enter three prompts to specify how you want the data processed. Press Ctrl+Enter to process.</p>
         </div>
-        
+
         {prompts.map((prompt, index) => (
           <div key={index} className="space-y-2">
             <Label htmlFor={`prompt-${index}`} className="text-[#001965]">

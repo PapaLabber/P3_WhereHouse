@@ -47,7 +47,6 @@ public class CapacityRequest {
                 palletAmount,
                 temperature,
                 productionSite,
-                year
-        );
+                year);
     }
 }
