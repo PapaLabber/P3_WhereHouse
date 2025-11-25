@@ -25,7 +25,7 @@ public class RealisedCapacity {
     return this.warehouse;
   }
 
-    public int getYear() {
+  public int getYear() {
     return this.year;
   }
 

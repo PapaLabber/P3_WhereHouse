@@ -1,27 +1,23 @@
 package group10.algorithms;
 
-import group10.excel.CapacityRequest;
-import group10.excel.ProductionSite;
-import group10.excel.RealisedCapacity;
-import group10.excel.Temperature;
-import group10.excel.Warehouse;
-
-import com.google.ortools.Loader;
-import com.google.ortools.linearsolver.MPSolver;
-import com.google.ortools.linearsolver.MPVariable;
-import com.google.ortools.linearsolver.MPObjective;
-import com.google.ortools.linearsolver.MPConstraint;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
+import java.util.ArrayList;
 import java.util.List;
 
-import java.io.*;
-import java.util.*;
+import javax.naming.spi.DirStateFactory;
+
+import com.google.ortools.Loader;
+import com.google.ortools.linearsolver.MPConstraint;
+import com.google.ortools.linearsolver.MPObjective;
+import com.google.ortools.linearsolver.MPSolver;
+import com.google.ortools.linearsolver.MPVariable;
+
+import group10.excel.CapacityRequest;
+import group10.excel.RealisedCapacity;
+import group10.excel.Result;
 
 public class WarehouseAllocator {
 
-    public void Allocator(List<CapacityRequest> requests, List<RealisedCapacity> realisedCap) {
+    public String Allocator(List<CapacityRequest> requests, List<RealisedCapacity> realisedCap) {
 
         Loader.loadNativeLibraries(); // OR-Tools native libs
 
@@ -107,11 +103,11 @@ public class WarehouseAllocator {
         System.out.println("---Objective Coefficients (Request x Warehouse)---");
         System.out.print("Request\\Warehouse");
         for (int c = 0; c < C; c++) {
-            System.out.printf("%15s", realisedCap.get(c).getWarehouse().getName());
+            System.out.printf("%15s", realisedCap.get(c).getWarehouse().getName()+"(" + realisedCap.get(c).getTemperature() + ")");
         }
         System.out.println();
         for (int r = 0; r < R; r++) {
-            System.out.printf("R%d%13s", r, "");
+            System.out.printf("R%13s", requests.get(r).getID() + "(" + requests.get(r).getTemperature() + ")", "");
             for (int c = 0; c < C; c++) {
                 System.out.printf("%15.2f", obj.getCoefficient(x[r][c])); // coefficient used for x[r][c]
             }
@@ -124,23 +120,35 @@ public class WarehouseAllocator {
         final MPSolver.ResultStatus resultStatus = solver.solve();
         if (resultStatus != MPSolver.ResultStatus.OPTIMAL && resultStatus != MPSolver.ResultStatus.FEASIBLE) {
             System.err.println("No feasible/optimal solution found: " + resultStatus);
-            return;
+            return resultStatus.toString();
         }
 
         System.out.println("Objective: " + obj.value());
 
         // --- 5) Collect and write allocations back to Excel ---
         // For each request r, generate strings like "WH_A_50;WH_B_150" etc.
+
+        List<Result> allocResult = new ArrayList<>();
         for (int r = 0; r < R; ++r) {
-            List<String> parts = new ArrayList<>();
+            List<String> allocList = new ArrayList<>();
             for (int c = 0; c < C; ++c) {
                 long val = Math.round(x[r][c].solutionValue());
                 if (val > 0) {
-                    parts.add(realisedCap.get(c).getWarehouse() + "_" + val);
+                    allocList.add(realisedCap.get(c).getWarehouse() + "_" + realisedCap.get(c).getTemperature() + "_" + val);
+                    allocResult.add(new Result(realisedCap.get(c).getWarehouse(), realisedCap.get(c).getTemperature(), (int)val, requests.get(r)));
                 }
             }
-            String out = String.join(";", parts);
-            System.out.println("Request " + requests.get(r).getID() + " -> " + out);
+            String out = String.join(";", allocList);
+            System.out.println("Request " + requests.get(r).getID() + " " + requests.get(r).getTemperature() + " -> " + out);
         }
+        System.out.println("--- Full Allocations ---");
+        for (Result res : allocResult) {
+            System.out.println(res.toString());
+        }
+        System.out.println();
+        System.out.println();
+
+        
+        return resultStatus.toString();
     }
 }

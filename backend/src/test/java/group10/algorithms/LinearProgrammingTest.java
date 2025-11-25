@@ -3,6 +3,18 @@ package group10.algorithms;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.ArrayList;
+
+import group10.excel.Result;
+import group10.excel.RealisedCapacity;
+import group10.excel.CapacityRequest;
+import group10.excel.Temperature;
+import group10.excel.Warehouse;
+import group10.excel.ProductionSite;
+
+
+
 /*
  * Unit tests for LinearProgramming solver.
  * Tests verify that the LP solver correctly handles various scenarios:
@@ -13,45 +25,7 @@ import org.junit.jupiter.api.Test;
  */
 class LinearProgrammingTest {
 
-    /*
-     * Helper class to encapsulate LP input data and expected results.
-     */
-    static class LPTestCase {
-        int warehouses;
-        int products;
-        int factories;
-        double[][] transportDistances;
-        double[][] demand;
-        double[][] warehouseCapacities;
-        boolean shouldBeOptimal;
-        Double expectedOptimalCost; // null if infeasible
 
-        LPTestCase(int warehouses, int products, int factories,
-                   double[][] transportDistances, double[][] demand,
-                   double[][] warehouseCapacities, boolean shouldBeOptimal,
-                   Double expectedOptimalCost) {
-
-            this.warehouses = warehouses;
-            this.products = products;
-            this.factories = factories;
-            this.transportDistances = transportDistances;
-            this.demand = demand;
-            this.warehouseCapacities = warehouseCapacities;
-            this.shouldBeOptimal = shouldBeOptimal;
-            this.expectedOptimalCost = expectedOptimalCost;
-        }
-    }
-
-    /*
-     * Create and solve an LP instance with the given test case data.
-     * Returns the solver result status as a string for assertion.
-     */
-    private String solveLPAndReturnStatus(LPTestCase tc) {
-        return LinearProgrammingTestHelper.solveLPWithData(
-            tc.warehouses, tc.products, tc.factories,
-            tc.transportDistances, tc.demand, tc.warehouseCapacities
-        );
-    }
 
     /*                               
      * Test 1: Optimal problem with exact capacity match.
@@ -59,16 +33,20 @@ class LinearProgrammingTest {
      */
     @Test
     void testFeasibleProblem_ExactCapacityMatch() {
-        LPTestCase tc = new LPTestCase(
-            2, 3, 2,
-            new double[][]{ { 3, 4 }, { 5, 2 } },                // transportDistances, warehouse 0 to factory 0 and 1 in [0][0-1]
-            new double[][]{ { 100, 0 }, { 80, 50 }, { 0, 50 } }, // demand, product 0 (ambient) to factory 0 and 1 in [0][0-1]
-            new double[][]{ { 100, 0 }, { 80, 50 }, { 50, 0 } }, // warehouseCapacities, product 0 (ambient) for warehouse 0 and 1 in [0][0-1]
-            true,                               // shouldBeOptimal = true due to expected feasibility
-            840.0                           // expected cost: (100*3) + (80*3) + (50*2) + (50*4) = 300+240+100+200 = 840
-        );
+        List<CapacityRequest> requests = new ArrayList<>();
+        List<RealisedCapacity> realisedCap = new ArrayList<>();
 
-        String result = solveLPAndReturnStatus(tc);
+        requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
+        requests.add(new CapacityRequest(100, Temperature.COLD, ProductionSite.fromName("Kalundborg"), 2, 2026));
+        requests.add(new CapacityRequest(100, Temperature.FREEZE, ProductionSite.fromName("Hjørring"), 3, 2026));
+
+        realisedCap.add(new RealisedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealisedCapacity(100, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
+        realisedCap.add(new RealisedCapacity(100, Temperature.FREEZE, Warehouse.fromName("NEFF"), 2026));
+
+        WarehouseAllocator allocator = new WarehouseAllocator();
+
+        String result = allocator.Allocator(requests, realisedCap);
         assertEquals("OPTIMAL", result, "Expected optimal solution for optimal problem");
     }
 
@@ -78,16 +56,20 @@ class LinearProgrammingTest {
      */
     @Test
     void testInfeasibleProblem_InsufficientCapacity() {
-        LPTestCase tc = new LPTestCase(
-            2, 3, 2,
-            new double[][]{ { 3, 4 }, { 5, 2 } },                    // transportDistances, warehouse 0 to factory 0 and 1 in [0][0-1]
-            new double[][]{ { 100, 10 }, { 60, 10 }, { 20, 30 } },   // demand = 110, 70, 50, product 0 (ambient) to factory 0 and 1 in [0][0-1]
-            new double[][]{ { 100, 0 }, { 80, 50 }, { 0, 50 } },     // capacity = 100, 130, 50, product 0 (ambient) for warehouse 0 and 1 in [0][0-1]
-            false,                                  // shouldBeOptimal = false due to expected infeasibility
-            null                                // no expected cost due to expected infeasibility
-        );
+        List<CapacityRequest> requests = new ArrayList<>();
+        List<RealisedCapacity> realisedCap = new ArrayList<>();
 
-        String result = solveLPAndReturnStatus(tc);
+        requests.add(new CapacityRequest(110, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
+        requests.add(new CapacityRequest(100, Temperature.COLD, ProductionSite.fromName("Kalundborg"), 2, 2026));
+        requests.add(new CapacityRequest(100, Temperature.FREEZE, ProductionSite.fromName("Hjørring"), 3, 2026));
+
+        realisedCap.add(new RealisedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealisedCapacity(100, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
+        realisedCap.add(new RealisedCapacity(100, Temperature.FREEZE, Warehouse.fromName("NEFF"), 2026));
+
+        WarehouseAllocator allocator = new WarehouseAllocator();
+
+        String result = allocator.Allocator(requests, realisedCap);
         assertEquals("INFEASIBLE", result, "Expected infeasible status when capacity < demand");
     }
 
@@ -96,16 +78,16 @@ class LinearProgrammingTest {
      */
     @Test
     void testTrivialProblem_SingleDimension() {
-        LPTestCase tc = new LPTestCase(
-            1, 1, 1,
-            new double[][]{ { 5 } },    // transportDistances, warehouse 0 to factory 0 in [0][0]
-            new double[][]{ { 10 } },   // demand, product 0 (ambient) to factory 0 in [0][0]
-            new double[][]{ { 15 } },   // capacity >= demand, product 0 (ambient) for warehouse 0 in [0][0]
-            true,      // shouldBeOptimal = true due to expected feasibility
-            50.0   // 10 units * 5 km = 50
-        );
+        List<CapacityRequest> requests = new ArrayList<>();
+        List<RealisedCapacity> realisedCap = new ArrayList<>();
 
-        String result = solveLPAndReturnStatus(tc);
+        requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
+
+        realisedCap.add(new RealisedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+
+        WarehouseAllocator allocator = new WarehouseAllocator();
+
+        String result = allocator.Allocator(requests, realisedCap);
         assertEquals("OPTIMAL", result, "Expected optimal solution for trivial case");
     }
 
@@ -115,16 +97,24 @@ class LinearProgrammingTest {
      */
     @Test
     void testZeroCapacityConstraint() {
-        LPTestCase tc = new LPTestCase(
-            2, 2, 1,
-            new double[][]{ { 2 }, { 3 } },           // transportDistances, warehouse 0 to factory 0 in [0][0]
-            new double[][]{ { 30 }, { 20 } },         // demand, product 0 (ambient) to factory 0 in [0][0]
-            new double[][]{ { 30, 0 }, { 0, 20 } },   // warehouse 0: product 0 only; warehouse 1: product 1 only, product 0 (ambient) for warehouse 0 in [0][0-1]
-            true,                    // shouldBeOptimal = true due to expected feasibility
-            150.0                // (30*2) + (20*3) = 60 + 60 = 120
-        );
+        List<CapacityRequest> requests = new ArrayList<>();
+        List<RealisedCapacity> realisedCap = new ArrayList<>();
 
-        String result = solveLPAndReturnStatus(tc);
+        requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
+        requests.add(new CapacityRequest(100, Temperature.COLD, ProductionSite.fromName("Kalundborg"), 2, 2026));
+        requests.add(new CapacityRequest(100, Temperature.FREEZE, ProductionSite.fromName("Hjørring"), 3, 2026));
+
+        realisedCap.add(new RealisedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealisedCapacity(100, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
+        realisedCap.add(new RealisedCapacity(100, Temperature.FREEZE, Warehouse.fromName("NEFF"), 2026));
+        
+        realisedCap.add(new RealisedCapacity(0, Temperature.AMBIENT, Warehouse.fromName("PS HUB"), 2026));
+        realisedCap.add(new RealisedCapacity(0, Temperature.COLD, Warehouse.fromName("PS HUB"), 2026));
+        realisedCap.add(new RealisedCapacity(0, Temperature.FREEZE, Warehouse.fromName("PS HUB"), 2026));
+
+        WarehouseAllocator allocator = new WarehouseAllocator();
+
+        String result = allocator.Allocator(requests, realisedCap);
         assertEquals("OPTIMAL", result, "Expected optimal solution with zero capacity constraints");
     }
 
@@ -134,19 +124,18 @@ class LinearProgrammingTest {
      */
     @Test
     void testMultipleRoutesOptimization() {
-        // Warehouse 0 → Factory 0: cost 1 (cheap)
-        // Warehouse 1 → Factory 0: cost 10 (expensive)
-        // Capacity allows both to supply.
-        LPTestCase tc = new LPTestCase(
-            2, 1, 1,
-            new double[][]{ { 1 }, { 10 } },    // transportDistances, warehouse 0 to factory 0 in [0][0]
-            new double[][]{ { 50 } },           // demand, product 0 (ambient) to factory 0 in [0][0]
-            new double[][]{ { 50, 50 } },       // product 0 (ambient) for warehouse 0 in [0][0-1]
-            true,              // shouldBeOptimal = true due to expected feasibility
-            50.0           // All from warehouse 0 at cost 1: 50*1 = 50
-        );
+        List<CapacityRequest> requests = new ArrayList<>();
+        List<RealisedCapacity> realisedCap = new ArrayList<>();
 
-        String result = solveLPAndReturnStatus(tc);
+        requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
+
+        realisedCap.add(new RealisedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealisedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC II"), 2026));
+
+
+        WarehouseAllocator allocator = new WarehouseAllocator();
+
+        String result = allocator.Allocator(requests, realisedCap);
         assertEquals("OPTIMAL", result, "Expected optimal solution using cheapest routes");
     }
 
@@ -156,20 +145,18 @@ class LinearProgrammingTest {
      */
     @Test
     void testDemandSplitAcrossWarehouses() {
-        // Total demand: 100
-        // Warehouse 0 capacity: 60
-        // Warehouse 1 capacity: 50
-        // => Warehouse 0 ships 60, Warehouse 1 ships 40
-        LPTestCase tc = new LPTestCase(
-            2, 1, 1,
-            new double[][]{ { 2 }, { 3 } },   // transportDistances, warehouse 0 to factory 0 in [0][0]
-            new double[][]{ { 100 } },        // demand, product 0 (ambient) to factory 0 in [0][0]
-            new double[][]{ { 60, 50 } },     // product 0 (ambient) for warehouse 0 and 1 in [0][0-1]
-            true,     // shouldBeOptimal = true due to expected feasibility
-            420.0 // (60*2) + (40*3) = 120 + 120 = 240
-        );
+        List<CapacityRequest> requests = new ArrayList<>();
+        List<RealisedCapacity> realisedCap = new ArrayList<>();
 
-        String result = solveLPAndReturnStatus(tc);
+        requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
+
+        realisedCap.add(new RealisedCapacity(60, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealisedCapacity(40, Temperature.AMBIENT, Warehouse.fromName("PS PAC II"), 2026));
+
+        WarehouseAllocator allocator = new WarehouseAllocator();
+
+        String result = allocator.Allocator(requests, realisedCap);
         assertEquals("OPTIMAL", result, "Expected optimal distribution across warehouses");
     }
+       
 }
