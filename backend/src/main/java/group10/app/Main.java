@@ -34,6 +34,6 @@ public class Main {
         }
         */
         //new LinearProgramming().LP(wantedRequests, capacities);
-        new WarehouseAllocator().Allocator();
+        new WarehouseAllocator().Allocator(wantedRequests, capacities);
     }
 }
