@@ -1,17 +1,17 @@
-package group10.algorithms;
+package group10;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-import java.util.ArrayList;
-
-import group10.excel.Result;
-import group10.excel.RealisedCapacity;
+import group10.algorithms.WarehouseAllocator;
 import group10.excel.CapacityRequest;
+import group10.excel.ProductionSite;
+import group10.excel.RealisedCapacity;
 import group10.excel.Temperature;
 import group10.excel.Warehouse;
-import group10.excel.ProductionSite;
 
 /*
  * Unit tests for LinearProgramming solver.
