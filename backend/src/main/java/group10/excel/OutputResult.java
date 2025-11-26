@@ -58,6 +58,7 @@ public class OutputResult {
     public Path writeResultsToExcel(List<Result> results, String fileName) throws IOException {
         if (!fileName.endsWith(".xlsx"))
             fileName += ".xlsx";
+          
         Path outDir = Paths.get("./outputFile");
         Files.createDirectories(outDir);
         Path outFile = outDir.resolve(fileName);

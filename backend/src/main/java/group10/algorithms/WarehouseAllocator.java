@@ -106,7 +106,7 @@ public class WarehouseAllocator {
         }
         System.out.println();
         System.out.println();
-        
+
         return allocResult;
     }
 }

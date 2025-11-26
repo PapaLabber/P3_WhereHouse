@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
-import { Upload, FileText } from 'lucide-react';
-import { Card } from './ui/card';
+import { Upload, FileText } from "lucide-react";
+import { Card } from "./ui/card";
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
@@ -11,7 +11,7 @@ export function FileUpload({ onFileSelect, selectedFile }: FileUploadProps) {
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const files = Array.from(e.dataTransfer.files);
-    const xlsxFile = files.find(file => file.name.endsWith('.xlsx'));
+    const xlsxFile = files.find((file) => file.name.endsWith(".xlsx"));
     if (xlsxFile) {
       onFileSelect(xlsxFile);
     }
@@ -21,12 +21,15 @@ export function FileUpload({ onFileSelect, selectedFile }: FileUploadProps) {
     e.preventDefault();
   }, []);
 
-  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.name.endsWith('.csv')) {
-      onFileSelect(file);
-    }
-  }, [onFileSelect]);
+  const handleFileInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file && file.name.endsWith(".xlsx")) {
+        onFileSelect(file);
+      }
+    },
+    [onFileSelect]
+  );
 
   return (
     <Card className="p-8">
@@ -34,12 +37,12 @@ export function FileUpload({ onFileSelect, selectedFile }: FileUploadProps) {
         className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#001965] transition-colors cursor-pointer"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
-        onClick={() => document.getElementById('file-input')?.click()}
+        onClick={() => document.getElementById("file-input")?.click()}
       >
         <input
           id="file-input"
           type="file"
-          accept=".csv"
+          accept=".xlsx"
           onChange={handleFileInput}
           className="hidden"
         />
@@ -50,14 +53,17 @@ export function FileUpload({ onFileSelect, selectedFile }: FileUploadProps) {
             <div>
               <p className="text-sm text-gray-600">Selected file:</p>
               <p className="font-medium text-[#001965]">{selectedFile.name}</p>
-              <p className="text-xs text-gray-500">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+              <p className="text-xs text-gray-500">
+                {(selectedFile.size / 1024).toFixed(1)} KB
+              </p>
             </div>
           </div>
         ) : (
           <div className="space-y-4">
             <Upload className="h-12 w-12 text-gray-400 mx-auto" />
             <div>
-              <p className="text-lg">Drop your CSV file here</p>
+              {/* RET teksten fra CSV til XLSX */}
+              <p className="text-lg">Drop your XLSX file here</p>
               <p className="text-sm text-gray-500">or click to browse</p>
             </div>
           </div>
