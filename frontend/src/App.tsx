@@ -4,6 +4,8 @@ import { PromptInputs } from "./components/PromptInputs";
 import { ResultsDownload } from "./components/ResultsDownload";
 import { processData, type ProcessedResult } from "./utils/csvProcessor";
 import { Warehouse } from "lucide-react";
+import WarehouseDashboardComponent from "./components/WarehouseDashboard";
+
 
 export default function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -101,7 +103,15 @@ export default function App() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
-  );
+        
+        <section className="mt-10">
+        <h2 className="text-xl font-semibold text-[#001965] mb-4">
+          Dashboard
+        </h2>
+        <WarehouseDashboardComponent />
+      </section>
+
+    </main>
+  </div>
+);
 }
