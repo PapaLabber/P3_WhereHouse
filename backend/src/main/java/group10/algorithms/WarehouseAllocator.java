@@ -25,6 +25,7 @@ public class WarehouseAllocator {
         int R = requests.size();
         int C = realisedCap.size();
 
+        // -- 1) Find transport distances --
         double[][] transportDistances = new double[C][R];
         for (int c = 0; c < C; ++c) {
             for (int r = 0; r < R; ++r) {
@@ -34,16 +35,9 @@ public class WarehouseAllocator {
             }
         }
 
-        // --- 3) Build MIP model ---
         MPSolver solver = MPSolver.createSolver("CBC_MIXED_INTEGER_PROGRAMMING");
-        if (solver == null) {
-            //throw new Exception("Could not create solver (check OR-Tools installation)");
-        }
 
-        // decision variable: x[r][c]
-        // Example:
-        // Request #3 needs 150 pallets. Warehouse B can take 80.
-        // If the solver sets x[3][B] = 80, it means “allocate 80 pallets of request #3 to warehouse B”.
+        // -- 2) decision variable: x[r][c] --
         MPVariable[][] x = new MPVariable[R][C];
         for (int r = 0; r < R; ++r) {
             for (int c = 0; c < C; ++c) {
@@ -57,24 +51,7 @@ public class WarehouseAllocator {
             }
         }
 
-        // TODO: Remove
-        System.out.println("---Decision Variables (Request x Warehouse)---");
-        // Print header (warehouse indices)
-        System.out.print("Request\\Warehouse");
-        for (int c = 0; c < C; c++) {
-            System.out.printf("%15s", realisedCap.get(c).getWarehouse().getName() + "(" + realisedCap.get(c).getTemperature() + ")");
-        }
-        System.out.println();
-        // Print rows
-        for (int r = 0; r < R; r++) {
-            System.out.printf("R%14s", requests.get(r).getID() + "(" + requests.get(r).getTemperature() + ")", "");
-            for (int c = 0; c < C; c++) {
-                System.out.printf("%15s", x[r][c].name());
-            }
-            System.out.println();
-        }
-
-        // Request demands: sum_c x[r][c] == demand_r
+        // -- 3) Request demands: sum_c x[r][c] == demand_r --
         for (int r = 0; r < R; ++r) {
             MPConstraint constraint = solver.makeConstraint(requests.get(r).getPalletAmount(), requests.get(r).getPalletAmount(), "demand_" + r);
             for (int c = 0; c < C; ++c) {
@@ -82,7 +59,7 @@ public class WarehouseAllocator {
             }
         }
 
-        // Warehouse capacities: sum_r x[r][c] <= capacity_c
+        // -- 4) Warehouse capacities: sum_r x[r][c] <= capacity_c --
         for (int c = 0; c < C; ++c) {
             MPConstraint constraint = solver.makeConstraint(0.0, realisedCap.get(c).getPalletAmount(), "cap_" + c);
             for (int r = 0; r < R; ++r) {
@@ -90,7 +67,7 @@ public class WarehouseAllocator {
             }
         }
 
-        // Objective: minimize sum_{r,c} dist[c][r] * x[r][c]
+        // -- 5) Objective: minimize sum_{r,c} dist[c][r] * x[r][c] --
         MPObjective obj = solver.objective();
         for (int r = 0; r < R; ++r) {
             for (int c = 0; c < C; ++c) {
@@ -98,25 +75,9 @@ public class WarehouseAllocator {
             }
         }
 
-        // TODO: Remove 
-        // Print objective coefficient matrix (rows = request r, cols = realisedCap c)
-        System.out.println("---Objective Coefficients (Request x Warehouse)---");
-        System.out.print("Request\\Warehouse");
-        for (int c = 0; c < C; c++) {
-            System.out.printf("%15s", realisedCap.get(c).getWarehouse().getName()+"(" + realisedCap.get(c).getTemperature() + ")");
-        }
-        System.out.println();
-        for (int r = 0; r < R; r++) {
-            System.out.printf("R%13s", requests.get(r).getID() + "(" + requests.get(r).getTemperature() + ")", "");
-            for (int c = 0; c < C; c++) {
-                System.out.printf("%15.2f", obj.getCoefficient(x[r][c])); // coefficient used for x[r][c]
-            }
-            System.out.println();
-        }
-
         obj.setMinimization();
 
-        // --- 4) Solve ---
+        // --- 6) Solve ---
         final MPSolver.ResultStatus resultStatus = solver.solve();
         if (resultStatus != MPSolver.ResultStatus.OPTIMAL && resultStatus != MPSolver.ResultStatus.FEASIBLE) {
             System.err.println("No feasible/optimal solution found: " + resultStatus);
@@ -125,9 +86,8 @@ public class WarehouseAllocator {
 
         System.out.println("Objective: " + obj.value());
 
-        // --- 5) Collect and write allocations back to Excel ---
-        // For each request r, generate strings like "WH_A_50;WH_B_150" etc.
 
+        // --- 7) Collect and write allocations to a list of result objects---
         List<Result> allocResult = new ArrayList<>();
         for (int r = 0; r < R; ++r) {
             List<String> allocList = new ArrayList<>();
@@ -147,7 +107,6 @@ public class WarehouseAllocator {
         }
         System.out.println();
         System.out.println();
-
         
         return resultStatus.toString();
     }

@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import group10.algorithms.LinearProgramming;
 import group10.algorithms.WarehouseAllocator;
 import group10.excel.CapacityRequest;
 import group10.excel.ExcelReader;
@@ -33,7 +32,6 @@ public class Main {
             System.out.println(cap);
         }
         */
-        //new LinearProgramming().LP(wantedRequests, capacities);
         new WarehouseAllocator().Allocator(wantedRequests, capacities);
     }
 }

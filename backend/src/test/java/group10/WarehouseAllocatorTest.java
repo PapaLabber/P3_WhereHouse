@@ -13,8 +13,6 @@ import group10.excel.Temperature;
 import group10.excel.Warehouse;
 import group10.excel.ProductionSite;
 
-
-
 /*
  * Unit tests for LinearProgramming solver.
  * Tests verify that the LP solver correctly handles various scenarios:
@@ -23,10 +21,7 @@ import group10.excel.ProductionSite;
  * - Capacity constraints enforcement
  * - Objective value correctness
  */
-class LinearProgrammingTest {
-
-
-
+class WarehouseAllocatorTest {
     /*                               
      * Test 1: Optimal problem with exact capacity match.
      * Supply equals demand; all warehouses can serve factories.
