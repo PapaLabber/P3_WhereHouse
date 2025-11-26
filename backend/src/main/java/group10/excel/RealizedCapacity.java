@@ -33,8 +33,9 @@ public class RealizedCapacity {
   public String toString() {
     return String.format(
         "Pallet Amount = %d, Storage Condition = %s, Warehouse = %s",
-        palletAmount,
-        temperature,
-        warehouse);
+        this.palletAmount,
+        this.temperature,
+        this.warehouse
+    );
   }
 }

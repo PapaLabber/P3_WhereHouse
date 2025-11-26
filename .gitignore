@@ -22,11 +22,8 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
-node_modules
-node_modules
-node_modules
-node_modules
-node_modules
-node_modules
-node_modules
 node_modules/
+backend/target/surefire-reports/group10.algorithms.WarehouseAllocatorTest.txt
+backend/target/surefire-reports/group10.ExcelReaderTest.txt
+backend/target/surefire-reports/group10.OutputResultTest.txt
+backend/target/surefire-reports/group10.WarehouseAllocatorTest.txt

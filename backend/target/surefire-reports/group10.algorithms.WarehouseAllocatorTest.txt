@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: group10.algorithms.WarehouseAllocatorTest
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.059 s -- in group10.algorithms.WarehouseAllocatorTest
