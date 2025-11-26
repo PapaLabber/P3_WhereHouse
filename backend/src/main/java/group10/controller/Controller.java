@@ -1,6 +1,7 @@
 package group10.controller;
 
 import group10.excel.*;
+import group10.algorithms.*;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +32,7 @@ public class Controller {
 
     @Autowired
     private OutputResult outputResult;
+    private WarehouseAllocator allocator;
 
     @PostMapping("/export")
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file,
@@ -60,18 +62,10 @@ public class Controller {
             ExcelReader reader = new ExcelReader(tempFile);
 
             List<CapacityRequest> wantedRequests = reader.filterRequest(wantedCountry, wantedYear);
-            for (CapacityRequest req : wantedRequests) {
-                System.out.println(req);
-            }
 
             List<RealizedCapacity> capacities = reader.warehouseCapacity(wantedCountry, wantedYear);
-            for (RealizedCapacity cap : capacities) {
-                System.out.println(cap);
-            }
 
-            List<Result> results = new ArrayList<>();
-
-            // Kør algoritme
+            List<Result> results = allocator.Allocator(wantedRequests, capacities);
 
             pathOfFile = outputResult.writeResultsToExcel(results, fileName);
 

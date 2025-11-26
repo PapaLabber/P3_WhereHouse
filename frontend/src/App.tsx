@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { FileUpload } from "./components/FileUpload";
 import { PromptInputs } from "./components/PromptInputs";
 import { ResultsDownload } from "./components/ResultsDownload";
-import { processData, type ProcessedResult } from "./utils/csvProcessor";
+import { processDataFromBackend, type ProcessedResult } from "./utils/dataProcessor";
 import { Warehouse } from "lucide-react";
 import { DropdownSelect, type Option } from "./components/DropdownSelect";
 
@@ -29,21 +29,17 @@ export default function App() {
     "",
   ]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [result, setResult] = useState<ProcessedResult | null>(null);
-
   const [country, setCountry] = useState<Country | null>(null);
   const [year, setYear] = useState<Year | null>(null);
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
-    setResult(null); // Clear previous results
-
     if (country && year) handleProcess();
   };
 
   const API = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
-  const handleProcess = async () => {
+  const handleProcess = useCallback(async () => {
     if (!selectedFile || !country || !year) return;
 
     setIsProcessing(true);
@@ -53,11 +49,7 @@ export default function App() {
       form.append("wantedCountry", country);
       form.append("wantedYear", year.toString());
 
-      const res = await fetch(`${API}/api/export`, {
-        method: "POST",
-        body: form, // <-- browser sets multipart boundary automatically
-      });
-
+      const res = await fetch(`${API}/api/export`, { method: "POST", body: form });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const blob = await res.blob();
@@ -66,31 +58,25 @@ export default function App() {
       const a = document.createElement("a");
       a.href = url;
       a.download = `AllocatedResult${country}${year}.xlsx`;
-      document.body.appendChild(a);
       a.click();
-      a.remove();
 
       URL.revokeObjectURL(url);
     } catch (err) {
-      console.error("Processing failed:", err);
-    } finally {
-      setIsProcessing(false);
+      console.error(err);
     }
-  };
+    setIsProcessing(false);
+  }, [selectedFile, country, year, API]);
+
+  useEffect(() => {
+    if (selectedFile && country && year) {
+      handleProcess();
+    }
+  }, [selectedFile, country, year, handleProcess]);
 
   const handleDownload = () => {
-    if (!result) return;
-
-    const blob = new Blob([result.csvData], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = result.filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    handleProcess(); // re-download from backend
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -172,7 +158,12 @@ export default function App() {
               <h2 className="text-xl font-semibold text-[#001965] mb-4">
                 Step 3: Download Results
               </h2>
-              <ResultsDownload result={result} onDownload={handleDownload} />
+              <ResultsDownload
+                filename={selectedFile ? `AllocatedResult${country}${year}.xlsx` : null}
+                filesize={selectedFile?.size}
+                onDownload={handleDownload}
+              />
+
             </div>
           </div>
         </div>

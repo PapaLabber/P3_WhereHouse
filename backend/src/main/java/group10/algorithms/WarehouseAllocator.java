@@ -17,7 +17,7 @@ import group10.excel.Result;
 
 public class WarehouseAllocator {
 
-    public String Allocator(List<CapacityRequest> requests, List<RealizedCapacity> realisedCap) {
+    public List<Result> Allocator(List<CapacityRequest> requests, List<RealizedCapacity> realisedCap) {
 
         Loader.loadNativeLibraries(); // OR-Tools native libs
 
@@ -81,7 +81,6 @@ public class WarehouseAllocator {
         final MPSolver.ResultStatus resultStatus = solver.solve();
         if (resultStatus != MPSolver.ResultStatus.OPTIMAL && resultStatus != MPSolver.ResultStatus.FEASIBLE) {
             System.err.println("No feasible/optimal solution found: " + resultStatus);
-            return resultStatus.toString();
         }
 
         System.out.println("Objective: " + obj.value());
@@ -108,6 +107,6 @@ public class WarehouseAllocator {
         System.out.println();
         System.out.println();
         
-        return resultStatus.toString();
+        return allocResult;
     }
 }
