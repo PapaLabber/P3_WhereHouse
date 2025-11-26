@@ -261,9 +261,5 @@ public class ExcelReader {
             default:
                 return 0;
         }
-
     }
-
-    // public <T> List<T> filterExcelSearch(String wantedCountry, int wantedYear) {
-    // }
 }

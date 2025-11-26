@@ -2,8 +2,14 @@ version: "3.9"
 
 services:
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: wherehouse-backend
+    environment:
+      - OUTPUT_DIR=/app/outputFile
+    volumes:
+      - ./outputFile:/app/outputFile
     # if later you make it a web server:
     # ports:
     #   - "8080:8080"
