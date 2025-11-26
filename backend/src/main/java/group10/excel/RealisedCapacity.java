@@ -25,7 +25,7 @@ public class RealisedCapacity {
     return this.warehouse;
   }
 
-    public int getYear() {
+  public int getYear() {
     return this.year;
   }
 
@@ -33,9 +33,9 @@ public class RealisedCapacity {
   public String toString() {
     return String.format(
         "Pallet Amount = %d, Storage Condition = %s, Warehouse = %s",
-        palletAmount,
-        temperature,
-        warehouse
+        this.palletAmount,
+        this.temperature,
+        this.warehouse
     );
   }
 }

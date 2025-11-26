@@ -1,19 +1,15 @@
 package group10.app;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import group10.excel.CapacityRequest;
-import group10.excel.ExcelReader;
-import group10.excel.RealisedCapacity;
 import group10.excel.OutputResult;
+import group10.excel.ProductionSite;
 import group10.excel.Result;
 import group10.excel.Temperature;
 import group10.excel.Warehouse;
@@ -44,9 +40,15 @@ public class TestRunner {
         Warehouse pspaci = new Warehouse("PS PAC I", 12, 55);
         Warehouse kalundborg = new Warehouse("PS WH KA", 12, 55);
 
-        Result result1 = new Result(neff, Temperature.AMBIENT, 100);
-        Result result2 = new Result(pspaci, Temperature.AMBIENT, 100);
-        Result result3 = new Result(kalundborg, Temperature.AMBIENT, 100);
+        List<CapacityRequest> requests = new ArrayList<>();
+        requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
+        requests.add(new CapacityRequest(100, Temperature.COLD, ProductionSite.fromName("Kalundborg"), 2, 2026));
+        requests.add(new CapacityRequest(100, Temperature.FREEZE, ProductionSite.fromName("Hjørring"), 3, 2026));
+
+
+        Result result1 = new Result(neff, Temperature.AMBIENT, 100, requests.get(0));
+        Result result2 = new Result(pspaci, Temperature.AMBIENT, 100, requests.get(1));
+        Result result3 = new Result(kalundborg, Temperature.AMBIENT, 100, requests.get(2));
 
         results.add(result1);
         results.add(result2);
