@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import group10.algorithms.WarehouseAllocator;
 import group10.excel.CapacityRequest;
 import group10.excel.ProductionSite;
-import group10.excel.RealisedCapacity;
+import group10.excel.RealizedCapacity;
 import group10.excel.Temperature;
 import group10.excel.Warehouse;
 
@@ -29,15 +29,15 @@ class WarehouseAllocatorTest {
     @Test
     void testFeasibleProblem_ExactCapacityMatch() {
         List<CapacityRequest> requests = new ArrayList<>();
-        List<RealisedCapacity> realisedCap = new ArrayList<>();
+        List<RealizedCapacity> realisedCap = new ArrayList<>();
 
         requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
         requests.add(new CapacityRequest(100, Temperature.COLD, ProductionSite.fromName("Kalundborg"), 2, 2026));
         requests.add(new CapacityRequest(100, Temperature.FREEZE, ProductionSite.fromName("Hjørring"), 3, 2026));
 
-        realisedCap.add(new RealisedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
-        realisedCap.add(new RealisedCapacity(100, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
-        realisedCap.add(new RealisedCapacity(100, Temperature.FREEZE, Warehouse.fromName("NEFF"), 2026));
+        realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealizedCapacity(100, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
+        realisedCap.add(new RealizedCapacity(100, Temperature.FREEZE, Warehouse.fromName("NEFF"), 2026));
 
         WarehouseAllocator allocator = new WarehouseAllocator();
 
@@ -52,15 +52,15 @@ class WarehouseAllocatorTest {
     @Test
     void testInfeasibleProblem_InsufficientCapacity() {
         List<CapacityRequest> requests = new ArrayList<>();
-        List<RealisedCapacity> realisedCap = new ArrayList<>();
+        List<RealizedCapacity> realisedCap = new ArrayList<>();
 
         requests.add(new CapacityRequest(110, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
         requests.add(new CapacityRequest(100, Temperature.COLD, ProductionSite.fromName("Kalundborg"), 2, 2026));
         requests.add(new CapacityRequest(100, Temperature.FREEZE, ProductionSite.fromName("Hjørring"), 3, 2026));
 
-        realisedCap.add(new RealisedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
-        realisedCap.add(new RealisedCapacity(100, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
-        realisedCap.add(new RealisedCapacity(100, Temperature.FREEZE, Warehouse.fromName("NEFF"), 2026));
+        realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealizedCapacity(100, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
+        realisedCap.add(new RealizedCapacity(100, Temperature.FREEZE, Warehouse.fromName("NEFF"), 2026));
 
         WarehouseAllocator allocator = new WarehouseAllocator();
 
@@ -74,11 +74,11 @@ class WarehouseAllocatorTest {
     @Test
     void testTrivialProblem_SingleDimension() {
         List<CapacityRequest> requests = new ArrayList<>();
-        List<RealisedCapacity> realisedCap = new ArrayList<>();
+        List<RealizedCapacity> realisedCap = new ArrayList<>();
 
         requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
 
-        realisedCap.add(new RealisedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
 
         WarehouseAllocator allocator = new WarehouseAllocator();
 
@@ -93,19 +93,19 @@ class WarehouseAllocatorTest {
     @Test
     void testZeroCapacityConstraint() {
         List<CapacityRequest> requests = new ArrayList<>();
-        List<RealisedCapacity> realisedCap = new ArrayList<>();
+        List<RealizedCapacity> realisedCap = new ArrayList<>();
 
         requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
         requests.add(new CapacityRequest(100, Temperature.COLD, ProductionSite.fromName("Kalundborg"), 2, 2026));
         requests.add(new CapacityRequest(100, Temperature.FREEZE, ProductionSite.fromName("Hjørring"), 3, 2026));
 
-        realisedCap.add(new RealisedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
-        realisedCap.add(new RealisedCapacity(100, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
-        realisedCap.add(new RealisedCapacity(100, Temperature.FREEZE, Warehouse.fromName("NEFF"), 2026));
+        realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealizedCapacity(100, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
+        realisedCap.add(new RealizedCapacity(100, Temperature.FREEZE, Warehouse.fromName("NEFF"), 2026));
         
-        realisedCap.add(new RealisedCapacity(0, Temperature.AMBIENT, Warehouse.fromName("PS HUB"), 2026));
-        realisedCap.add(new RealisedCapacity(0, Temperature.COLD, Warehouse.fromName("PS HUB"), 2026));
-        realisedCap.add(new RealisedCapacity(0, Temperature.FREEZE, Warehouse.fromName("PS HUB"), 2026));
+        realisedCap.add(new RealizedCapacity(0, Temperature.AMBIENT, Warehouse.fromName("PS HUB"), 2026));
+        realisedCap.add(new RealizedCapacity(0, Temperature.COLD, Warehouse.fromName("PS HUB"), 2026));
+        realisedCap.add(new RealizedCapacity(0, Temperature.FREEZE, Warehouse.fromName("PS HUB"), 2026));
 
         WarehouseAllocator allocator = new WarehouseAllocator();
 
@@ -120,12 +120,12 @@ class WarehouseAllocatorTest {
     @Test
     void testMultipleRoutesOptimization() {
         List<CapacityRequest> requests = new ArrayList<>();
-        List<RealisedCapacity> realisedCap = new ArrayList<>();
+        List<RealizedCapacity> realisedCap = new ArrayList<>();
 
         requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
 
-        realisedCap.add(new RealisedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
-        realisedCap.add(new RealisedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC II"), 2026));
+        realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC II"), 2026));
 
 
         WarehouseAllocator allocator = new WarehouseAllocator();
@@ -141,12 +141,12 @@ class WarehouseAllocatorTest {
     @Test
     void testDemandSplitAcrossWarehouses() {
         List<CapacityRequest> requests = new ArrayList<>();
-        List<RealisedCapacity> realisedCap = new ArrayList<>();
+        List<RealizedCapacity> realisedCap = new ArrayList<>();
 
         requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
 
-        realisedCap.add(new RealisedCapacity(60, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
-        realisedCap.add(new RealisedCapacity(40, Temperature.AMBIENT, Warehouse.fromName("PS PAC II"), 2026));
+        realisedCap.add(new RealizedCapacity(60, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealizedCapacity(40, Temperature.AMBIENT, Warehouse.fromName("PS PAC II"), 2026));
 
         WarehouseAllocator allocator = new WarehouseAllocator();
 

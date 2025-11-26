@@ -42,8 +42,8 @@ public class Warehouse {
         return this.latitude;
     }
 
-    public List<RealisedCapacity> getRealisedCapacities() {
-        return this.realisedCapacities;
+    public List<RealizedCapacity> getRealisedCapacities() {
+        return this.realizedCapacities;
     }
 
     public String getName() {

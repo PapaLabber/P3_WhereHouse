@@ -12,12 +12,12 @@ import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
 
 import group10.excel.CapacityRequest;
-import group10.excel.RealisedCapacity;
+import group10.excel.RealizedCapacity;
 import group10.excel.Result;
 
 public class WarehouseAllocator {
 
-    public String Allocator(List<CapacityRequest> requests, List<RealisedCapacity> realisedCap) {
+    public String Allocator(List<CapacityRequest> requests, List<RealizedCapacity> realisedCap) {
 
         Loader.loadNativeLibraries(); // OR-Tools native libs
 
