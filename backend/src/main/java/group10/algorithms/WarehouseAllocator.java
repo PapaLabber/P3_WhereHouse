@@ -12,26 +12,26 @@ import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
 
 import group10.excel.CapacityRequest;
-import group10.excel.RealisedCapacity;
+import group10.excel.RealizedCapacity;
 import group10.excel.Result;
 
 public class WarehouseAllocator {
 
-    public String Allocator(List<CapacityRequest> requests, List<RealisedCapacity> realisedCap) {
+    public String Allocator(List<CapacityRequest> requests, List<RealizedCapacity> realizedCap) {
 
         Loader.loadNativeLibraries(); // OR-Tools native libs
 
-        //We want the size of requests and realisedCap(realised capacity) because we see them as single warehouse capacities and requests
+        //We want the size of requests and realizedCap(realized capacity) because we see them as single warehouse capacities and requests
         int R = requests.size();
-        int C = realisedCap.size();
+        int C = realizedCap.size();
 
         // -- 1) Find transport distances --
         double[][] transportDistances = new double[C][R];
         for (int c = 0; c < C; ++c) {
             for (int r = 0; r < R; ++r) {
                 transportDistances[c][r] = Math.sqrt(
-                        Math.pow(realisedCap.get(c).getWarehouse().getLongitude() - requests.get(r).getProductionSite().getLongitude(), 2)
-                        + Math.pow(realisedCap.get(c).getWarehouse().getLatitude() - requests.get(r).getProductionSite().getLatitude(), 2));
+                        Math.pow(realizedCap.get(c).getWarehouse().getLongitude() - requests.get(r).getProductionSite().getLongitude(), 2)
+                        + Math.pow(realizedCap.get(c).getWarehouse().getLatitude() - requests.get(r).getProductionSite().getLatitude(), 2));
             }
         }
 
@@ -45,7 +45,7 @@ public class WarehouseAllocator {
                 // Integer variable >= 0, up to demand_r (safe upper bound)
                 x[r][c] = solver.makeIntVar(0, requests.get(r).getPalletAmount(), name);
                 // Enforce temperature compatibility: if not compatible, set upper bound 0
-                if (realisedCap.get(c).getTemperature() != requests.get(r).getTemperature()) {
+                if (realizedCap.get(c).getTemperature() != requests.get(r).getTemperature()) {
                     x[r][c].setUb(0.0);
                 }
             }
@@ -61,7 +61,7 @@ public class WarehouseAllocator {
 
         // -- 4) Warehouse capacities: sum_r x[r][c] <= capacity_c --
         for (int c = 0; c < C; ++c) {
-            MPConstraint constraint = solver.makeConstraint(0.0, realisedCap.get(c).getPalletAmount(), "cap_" + c);
+            MPConstraint constraint = solver.makeConstraint(0.0, realizedCap.get(c).getPalletAmount(), "cap_" + c);
             for (int r = 0; r < R; ++r) {
                 constraint.setCoefficient(x[r][c], 1.0);
             }
@@ -94,8 +94,8 @@ public class WarehouseAllocator {
             for (int c = 0; c < C; ++c) {
                 long val = Math.round(x[r][c].solutionValue());
                 if (val > 0) {
-                    allocList.add(realisedCap.get(c).getWarehouse() + "_" + realisedCap.get(c).getTemperature() + "_" + val);
-                    allocResult.add(new Result(realisedCap.get(c).getWarehouse(), realisedCap.get(c).getTemperature(), (int)val, requests.get(r)));
+                    allocList.add(realizedCap.get(c).getWarehouse() + "_" + realizedCap.get(c).getTemperature() + "_" + val);
+                    allocResult.add(new Result(realizedCap.get(c).getWarehouse(), realizedCap.get(c).getTemperature(), (int)val, requests.get(r)));
                 }
             }
             String out = String.join(";", allocList);
