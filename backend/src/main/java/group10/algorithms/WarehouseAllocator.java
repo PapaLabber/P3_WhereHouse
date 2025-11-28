@@ -14,7 +14,9 @@ import com.google.ortools.linearsolver.MPVariable;
 import group10.excel.CapacityRequest;
 import group10.excel.RealizedCapacity;
 import group10.excel.Result;
+import org.springframework.stereotype.Service;
 
+@Service
 public class WarehouseAllocator {
 
     public List<Result> Allocator(List<CapacityRequest> requests, List<RealizedCapacity> realisedCap) {

@@ -11,8 +11,8 @@ services:
     volumes:
       - ./outputFile:/app/outputFile
     # if later you make it a web server:
-    # ports:
-    #   - "8080:8080"
+    ports:
+      - "8080:8080"
 
   frontend:
     build: ./frontend

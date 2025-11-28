@@ -37,7 +37,7 @@ export default function App() {
     if (country && year) handleProcess();
   };
 
-  const API = "http://localhost:3000";
+  const API = "http://localhost:8080";
 
   const handleProcess = useCallback(async () => {
     if (!selectedFile || !country || !year) return;
