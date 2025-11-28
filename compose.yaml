@@ -10,7 +10,6 @@ services:
       - OUTPUT_DIR=/app/outputFile
     volumes:
       - ./outputFile:/app/outputFile
-    # if later you make it a web server:
     ports:
       - "8080:8080"
 
@@ -18,6 +17,6 @@ services:
     build: ./frontend
     container_name: wherehouse-frontend
     ports:
-      - "3000:80" # browser -> localhost:3000
+      - "3000:80"
     depends_on:
       - backend
