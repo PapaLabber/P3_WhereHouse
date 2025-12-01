@@ -1,12 +1,21 @@
 package group10.excel;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * Reader til Excel-inputfilen.
@@ -52,7 +61,7 @@ public class ExcelReader {
 
         // 1. Læs header-række og lav map: header -> kolonneindeks
         Row headerRow = it.next();
-        Map<String, Integer> colIndex = getHeaderIndexMap(headerRow);
+        Map<String, Integer> colIndex = getHeaderIndexMap(headerRow); // TODO: kom tilbage (Mads)
 
         List<CapacityRequest> result = new ArrayList<>();
 
@@ -212,7 +221,7 @@ public class ExcelReader {
     /**
      * Build map of header name -> column index.
      */
-    private Map<String, Integer> getHeaderIndexMap(Row headerRow) {
+    private Map<String, Integer> getHeaderIndexMap(Row headerRow) { 
         Map<String, Integer> map = new HashMap<>();
         for (Cell cell : headerRow) {
             if (cell == null) continue;
@@ -259,7 +268,7 @@ public class ExcelReader {
     /**
      * Læs heltalsværdi fra en celle. Returnerer 0 hvis blank/ikke-numerisk.
      */
-    private int getIntCell(Row row, Integer colIdx) {
+    private int getIntCell(Row row, Integer colIdx) { // TODO: sammenlign med getStringCell (Erik)
         if (colIdx == null) {
             return 0;
         }

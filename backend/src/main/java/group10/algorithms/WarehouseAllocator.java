@@ -3,7 +3,7 @@ package group10.algorithms;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.naming.spi.DirStateFactory;
+import org.springframework.stereotype.Service;
 
 import com.google.ortools.Loader;
 import com.google.ortools.linearsolver.MPConstraint;
@@ -14,9 +14,8 @@ import com.google.ortools.linearsolver.MPVariable;
 import group10.excel.CapacityRequest;
 import group10.excel.RealizedCapacity;
 import group10.excel.Result;
-import org.springframework.stereotype.Service;
 
-@Service
+@Service //TODO: Forklar nærmere (Philippe)
 public class WarehouseAllocator {
 
     public List<Result> Allocator(List<CapacityRequest> requests, List<RealizedCapacity> realisedCap) {
@@ -39,7 +38,7 @@ public class WarehouseAllocator {
 
         MPSolver solver = MPSolver.createSolver("CBC_MIXED_INTEGER_PROGRAMMING");
 
-        // -- 2) decision variable: x[r][c] --
+        // -- 2) compatibility variable matrix: x[r][c] --
         MPVariable[][] x = new MPVariable[R][C];
         for (int r = 0; r < R; ++r) {
             for (int c = 0; c < C; ++c) {
