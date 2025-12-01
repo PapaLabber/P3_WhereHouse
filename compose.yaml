@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: wherehouse-backend
+    environment:
+      - OUTPUT_DIR=/app/outputFile
+    volumes:
+      - ./outputFile:/app/outputFile
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    container_name: wherehouse-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend

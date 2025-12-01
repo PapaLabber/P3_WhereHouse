@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowJs": false
+  },
+  "include": ["frontend/src/**/*.ts", "frontend/src/**/*.tsx", "frontend/src/vite-env.d.ts"],
+  "exclude": ["node_modules", "dist"]
+}
