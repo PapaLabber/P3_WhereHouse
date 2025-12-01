@@ -8,18 +8,29 @@ public class DataValue {
     private String key;
     private int amount;
 
-    public DataValue() {}
+    public DataValue() {
+    }
 
     public DataValue(String key, int amount) {
         this.key = key;
         this.amount = amount;
     }
 
-    public String getKey() { return key; }
-    public void setKey(String key) { this.key = key; }
+    public String getKey() {
+        return key;
+    }
 
-    public int getAmount() { return amount; }
-    public void setAmount(int amount) { this.amount = amount; }
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int amount) {
+        this.amount = amount;
+    }
 
     @Override
     public String toString() {

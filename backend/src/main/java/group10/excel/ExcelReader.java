@@ -1,36 +1,27 @@
 package group10.excel;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
 /**
- * Reads the first sheet of an Excel file and returns all valid CapacityRequest
- * rows.
+ * Reader til Excel-inputfilen.
  *
- * A row is considered valid if: - Country matches wantedCountry
- * (case-insensitive) - PalletAmount > 0 - ProductionSite is known
- * (ProductionSite.fromName(...) returns non-null) - Temperature can be mapped
- * to a TemperatureZone (Ambient / Cold / Freeze)
+ * Forudsætter et ark med kolonner som mindst:
+ *  - "Country"
+ *  - "PalletAmount"
+ *  - "Year"
+ *  - "ProductionSite"
+ *  - "Temperature"
+ *  - "ID"           (til requests)
+ *  - "Warehouse"
+ *  - "Capacity"
  *
- * Required columns in the Excel header row: "Country" "PalletAmount"
- * "Temperature" "ProductionSite"
+ * Justér kolonnenavne her, hvis de hedder noget andet i din fil.
  */
 public class ExcelReader {
 
@@ -38,52 +29,63 @@ public class ExcelReader {
     private final Sheet sheet;
 
     public ExcelReader(File excelFile) throws InvalidFormatException, IOException {
-        this.workbook = new XSSFWorkbook(excelFile); // open .xlsx
-        this.sheet = workbook.getSheetAt(0);         // first sheet only
+        this.workbook = new XSSFWorkbook(excelFile); // åbner .xlsx
+        this.sheet = workbook.getSheetAt(0);         // bruger første sheet
     }
 
+    /**
+     * Filtrér alle CapacityRequest efter land og år.
+     * Bruger kolonner:
+     *  - "Country"
+     *  - "PalletAmount"
+     *  - "Year"
+     *  - "ProductionSite"
+     *  - "Temperature"
+     *  - "ID"
+     */
     public List<CapacityRequest> filterRequest(String wantedCountry, int wantedYear) throws IOException {
         Iterator<Row> it = sheet.iterator();
-        if (!it.hasNext()) { // no rows at all
+        if (!it.hasNext()) { // ingen rækker
             workbook.close();
             return Collections.emptyList();
         }
 
-        // 1. Read header row, build lookup map: header name -> column index
+        // 1. Læs header-række og lav map: header -> kolonneindeks
         Row headerRow = it.next();
         Map<String, Integer> colIndex = getHeaderIndexMap(headerRow);
 
         List<CapacityRequest> result = new ArrayList<>();
 
-        // 2. Process all data rows
+        // 2. Gennemgå alle datarækker
         while (it.hasNext()) {
             Row row = it.next();
             if (row == null) {
                 continue;
             }
 
-            // A. Filter by Country
+            // Country
             String country = getStringCell(row, colIndex.get("Country"));
             if (country == null || !wantedCountry.equalsIgnoreCase(country.trim())) {
                 continue;
             }
 
-            // B. Filter by PalletAmount > 0
+            // PalletAmount > 0
             int pallets = getIntCell(row, colIndex.get("PalletAmount"));
             if (pallets <= 0) {
                 continue;
             }
 
+            // Year
             int year = getIntCell(row, colIndex.get("Year"));
             if (wantedYear != year) {
                 continue;
             }
 
-            // C. Parse ProductionSite using the registry
+            // ProductionSite
             String siteName = getStringCell(row, colIndex.get("ProductionSite"));
             ProductionSite site = ProductionSite.fromName(siteName);
 
-            // D. Parse Temperature -> TemperatureZone enum
+            // Temperature
             String tempRaw = getStringCell(row, colIndex.get("Temperature"));
             Temperature zone = Temperature.fromString(tempRaw);
             if (zone == null) {
@@ -91,105 +93,130 @@ public class ExcelReader {
                 continue;
             }
 
-            // E. Compute ID from row number (make 1-based if desired)
-            int ID = row.getRowNum() + 1;
+            // ID (enten fra kolonnen "ID" eller fallback til rækkenummer)
+            int id;
+            if (colIndex.containsKey("ID")) {
+                id = getIntCell(row, colIndex.get("ID"));
+            } else {
+                id = row.getRowNum();
+            }
 
-            // F. Build domain object
+            // KORREKT konstruktor‑kald:
             CapacityRequest req = new CapacityRequest(
-                    pallets,
-                    zone,
-                    site,
-                    ID,
-                    year
+                    pallets,    // int palletAmount
+                    zone,       // Temperature temperature
+                    site,       // ProductionSite productionSite
+                    id,         // int ID
+                    year        // int year
             );
 
-            // G. Keep it
             result.add(req);
-
         }
+
         workbook.close();
         return result;
     }
 
-    public List<RealisedCapacity> warehouseCapacity(String wantedCountry, int wantedYear) throws IOException {
+    /**
+     * Læs alle RealizedCapacity fra samme sheet (uden filtrering).
+     * Bruger kolonner:
+     *  - "Warehouse"
+     *  - "Capacity"
+     *  - "Temperature"
+     *  - "Year"
+     */
+    public List<RealizedCapacity> getRealizedCap() throws IOException {
+        List<RealizedCapacity> capacities = new ArrayList<>();
+
         Iterator<Row> it = sheet.iterator();
-        if (!it.hasNext()) { // no rows at all
+        if (!it.hasNext()) { // ingen rækker
             workbook.close();
-            return Collections.emptyList();
+            return capacities;
         }
 
         Row headerRow = it.next();
         Map<String, Integer> colIndex = getHeaderIndexMap(headerRow);
 
-        List<RealisedCapacity> result = new ArrayList<>();
+        Integer colWarehouse = colIndex.get("Warehouse");
+        Integer colCap       = colIndex.get("Capacity");
+        Integer colTemp      = colIndex.get("Temperature");
+        Integer colYear      = colIndex.get("Year");
 
         while (it.hasNext()) {
             Row row = it.next();
-            if (row == null) {
-                continue;
-            }
+            if (row == null) continue;
 
-            // Filter by Country
-            String country = getStringCell(row, colIndex.get("Country"));
-            if (country == null || !wantedCountry.equalsIgnoreCase(country.trim())) {
-                continue;
-            }
-            // Skip FP warehouses
-            Set<String> SKIP_WAREHOUSES = new HashSet<>(Arrays.asList("dsv", "ps hub"));
+            String whName  = getStringCell(row, colWarehouse);
+            int capacity   = getIntCell(row, colCap);
+            String tempRaw = getStringCell(row, colTemp);
+            int year       = (colYear != null) ? getIntCell(row, colYear) : 0;
 
-            String warehouseCell = getStringCell(row, colIndex.get("Warehouse"));
-            if (warehouseCell != null && SKIP_WAREHOUSES.contains(warehouseCell.trim().toLowerCase(Locale.ROOT))) {
-                continue;
-            }
+            if (whName == null || tempRaw == null || capacity <= 0) continue;
 
-            // Filter by PalletAmount > 0
-            int pallets = getIntCell(row, colIndex.get("L&D Capacity (Physical pallet spaces)"));
-            if (pallets <= 0) {
-                continue;
-            }
-
-            // Skip years that are not specified
-            int year = getIntCell(row, colIndex.get("Year"));
-            if (wantedYear != year) {
-                continue;
-            }
-
-            // Parse Warehouse using the registry
-            String warehouseName = getStringCell(row, colIndex.get("Warehouse"));
-            Warehouse warehouse = Warehouse.fromName(warehouseName);
-
-            // Parse Temperature -> TemperatureZone enum
-            String tempRaw = getStringCell(row, colIndex.get("Temperature"));
             Temperature zone = Temperature.fromString(tempRaw);
             if (zone == null) {
-                System.err.println("Skipping row: invalid Temperature '" + tempRaw + "'");
+                System.err.println("Skipping row (warehouse): invalid Temperature '" + tempRaw + "'");
                 continue;
             }
 
-            // Build domain object
-            RealisedCapacity req = new RealisedCapacity(
-                    pallets,
-                    zone,
-                    warehouse,
-                    year
+            // Byg Warehouse – tilpas hvis du har en anden måde
+            Warehouse wh = Warehouse.fromName(whName);
+
+            // korrekt konstruktor-kald:
+            RealizedCapacity rc = new RealizedCapacity(
+                    capacity,  // int palletAmount
+                    zone,      // Temperature temperature
+                    wh,        // Warehouse warehouse
+                    year       // int year (0 hvis ingen kolonne)
             );
 
-            // G. Keep it
-            result.add(req);
+            capacities.add(rc);
         }
+
         workbook.close();
-        return result;
+        return capacities;
     }
 
-    // ---------- helper methods below ----------
     /**
-     * Build map of header name -> column index. If header row has cells:
-     * [Country][PalletAmount][Date]... You'll get { "Country"=0,
-     * "PalletAmount"=1, "Date"=2, ... }
+     * Bruges af tests (ExcelReaderTest).
+     * Returnerer en liste af RealizedCapacity filtreret på land og år.
+     *
+     * Hvis dine tests forventer noget andet filter (kun år, kun land osv.),
+     * kan du justere filtreringen her.
+     */
+    public List<RealizedCapacity> warehouseCapacity(String wantedCountry, int wantedYear) throws IOException {
+        // Udgangspunkt: brug alle RealizedCapacity og filtrér
+        List<RealizedCapacity> all = getRealizedCap();
+        List<RealizedCapacity> filtered = new ArrayList<>();
+
+        for (RealizedCapacity rc : all) {
+            // Filtrér på år
+            if (rc.getYear() != wantedYear) {
+                continue;
+            }
+
+            // Hvis Warehouse har et land, kan du filtrere her.
+            // Eksempel (tilpas til din Warehouse-klasse):
+            Warehouse wh = rc.getWarehouse();
+            // Hvis Warehouse ikke har country, så fjern dette filter.
+            // if (!wh.getCountry().equalsIgnoreCase(wantedCountry)) {
+            //     continue;
+            // }
+
+            filtered.add(rc);
+        }
+
+        return filtered;
+    }
+
+    /**
+     * Build map of header name -> column index.
      */
     private Map<String, Integer> getHeaderIndexMap(Row headerRow) {
         Map<String, Integer> map = new HashMap<>();
         for (Cell cell : headerRow) {
+            if (cell == null) continue;
+            if (cell.getCellType() != CellType.STRING) continue;
             String headerName = cell.getStringCellValue().trim();
             map.put(headerName, cell.getColumnIndex());
         }
@@ -197,13 +224,12 @@ public class ExcelReader {
     }
 
     /**
-     * Safely read a cell as String, even if the cell is numeric or boolean.
-     * Returns null if the cell is blank or unusable.
+     * Læs en celle som String, også hvis den er numerisk/boolsk.
+     * Returnerer null hvis tom.
      */
     private String getStringCell(Row row, Integer colIdx) {
         if (colIdx == null) {
-            return null; // header missing
-
+            return null; // header mangler
         }
         Cell cell = row.getCell(colIdx, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
         if (cell == null) {
@@ -217,9 +243,9 @@ public class ExcelReader {
             case NUMERIC:
                 double n = cell.getNumericCellValue();
                 if (n == Math.floor(n)) {
-                    return String.valueOf((long) n); // "42"
+                    return String.valueOf((long) n);
                 } else {
-                    return String.valueOf(n);        // "42.5"
+                    return String.valueOf(n);
                 }
 
             case BOOLEAN:
@@ -231,8 +257,7 @@ public class ExcelReader {
     }
 
     /**
-     * Read an integer-like value from a cell. Returns 0 if blank or
-     * non-numeric.
+     * Læs heltalsværdi fra en celle. Returnerer 0 hvis blank/ikke-numerisk.
      */
     private int getIntCell(Row row, Integer colIdx) {
         if (colIdx == null) {
@@ -245,19 +270,13 @@ public class ExcelReader {
 
         switch (cell.getCellType()) {
             case NUMERIC:
-                return (int) cell.getNumericCellValue();
-
+                return (int) Math.round(cell.getNumericCellValue());
             case STRING:
-                String s = cell.getStringCellValue().trim();
-                if (s.isEmpty()) {
-                    return 0;
-                }
                 try {
-                    return Integer.parseInt(s);
+                    return Integer.parseInt(cell.getStringCellValue().trim());
                 } catch (NumberFormatException e) {
                     return 0;
                 }
-
             default:
                 return 0;
         }

@@ -1,5 +1,4 @@
 
-
 package group10.excel;
 
 /**
@@ -7,9 +6,9 @@ package group10.excel;
  * Comes directly from the "Temperature" column in Excel.
  *
  * Valid values in Excel:
- *   Ambient
- *   Cold
- *   Freeze
+ * Ambient
+ * Cold
+ * Freeze
  */
 public enum Temperature {
     AMBIENT,

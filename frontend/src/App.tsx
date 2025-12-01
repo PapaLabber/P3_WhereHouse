@@ -1,11 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { FileUpload } from "./components/FileUpload";
 import { PromptInputs } from "./components/PromptInputs";
 import { ResultsDownload } from "./components/ResultsDownload";
-import { processData, type ProcessedResult } from "./utils/csvProcessor";
+import { processDataFromBackend, type ProcessedResult } from "./utils/dataProcessor";
 import { Warehouse } from "lucide-react";
-import WarehouseDashboardComponent from "./components/WarehouseDashboard";
+import { DropdownSelect, type Option } from "./components/DropdownSelect";
 
+type Country = "DENMARK" | "SWEDEN" | "NORWAY";
+type Year = "2024" | "2025" | "2026";
+
+const COUNTRY_OPTIONS: Option<Country>[] = [
+  { label: "Denmark", value: "DENMARK" },
+  { label: "Sweden", value: "SWEDEN" },
+  { label: "Norway", value: "NORWAY", disabled: true },
+];
+
+const YEAR_OPTIONS: Option<Year>[] = [
+  { label: "2024", value: "2024" },
+  { label: "2025", value: "2025" },
+  { label: "2026", value: "2026", disabled: true },
+];
 
 export default function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -15,40 +29,68 @@ export default function App() {
     "",
   ]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [result, setResult] = useState<ProcessedResult | null>(null);
+  const [country, setCountry] = useState<Country | null>(null);
+  const [year, setYear] = useState<Year | null>(null);
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
-    setResult(null); // Clear previous results
+    if (country && year) handleProcess();
   };
 
-  const handleProcess = async () => {
-    if (!selectedFile || prompts.every((p) => !p.trim())) return;
+  const API = "http://localhost:8080";
+
+  const handleProcess = useCallback(async () => {
+    if (!selectedFile || !country || !year) return;
 
     setIsProcessing(true);
     try {
-      const processedResult = await processData(selectedFile, prompts);
-      setResult(processedResult);
-    } catch (error) {
-      console.error("Processing failed:", error);
+      const form = new FormData();
+      form.append("file", selectedFile, selectedFile.name);
+
+      // Tilpas disse to linjer til hvad backend forventer:
+      // Eksempel: hvis Country er et objekt med 'code' felt:
+      form.append("wantedCountry", (country as any).code ?? String(country));
+      form.append("wantedYear", String(year));
+
+      const res = await fetch(`${API}/api/export`, {
+        method: "POST",
+        body: form,
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error("Export failed", res.status, text);
+        alert(`Download fejlede (HTTP ${res.status}). Se console for detaljer.`);
+        return;
+      }
+
+      const blob = await res.blob();
+      if (!blob || blob.size === 0) {
+        console.error("Empty blob received");
+        alert("Modtog en tom fil fra serveren.");
+        return;
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `AllocatedResult-${(country as any).code ?? country}-${year}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Error while downloading file", err);
+      alert("Der opstod en fejl under download. Se console for detaljer.");
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [selectedFile, country, year]);
 
   const handleDownload = () => {
-    if (!result) return;
-
-    const blob = new Blob([result.csvData], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = result.filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    handleProcess(); // re-download from backend
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -88,18 +130,54 @@ export default function App() {
           <div className="space-y-7">
             <div>
               <h2 className="text-xl font-semibold text-[#001965] mb-4">
-                Step 1: Upload xlsx File
+                Step 1: Filter your search
+              </h2>
+
+              <div className="grid gap-6 md:grid-cols-3">
+                <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                  <h3 className="text-[#001965] font-medium mb-2">Country</h3>
+                  <DropdownSelect
+                    label=""
+                    value={country}
+                    onChange={setCountry}
+                    options={COUNTRY_OPTIONS}
+                    placeholder="Choose a country"
+                  />
+                </div>
+
+                <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                  <h3 className="text-[#001965] font-medium mb-2">Year</h3>
+                  <DropdownSelect
+                    label=""
+                    value={year}
+                    onChange={setYear}
+                    options={YEAR_OPTIONS}
+                    placeholder="Pick a year"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-semibold text-[#001965] mb-4">
+                Step 2: Upload xlsx File
               </h2>
               <FileUpload
                 onFileSelect={handleFileSelect}
                 selectedFile={selectedFile}
               />
             </div>
+
             <div>
               <h2 className="text-xl font-semibold text-[#001965] mb-4">
-                Step 2: Download Results
+                Step 3: Download Results
               </h2>
-              <ResultsDownload result={result} onDownload={handleDownload} />
+              <ResultsDownload
+                filename={selectedFile ? `AllocatedResult${country}${year}.xlsx` : null}
+                filesize={selectedFile?.size}
+                onDownload={handleDownload}
+              />
+
             </div>
           </div>
         </div>

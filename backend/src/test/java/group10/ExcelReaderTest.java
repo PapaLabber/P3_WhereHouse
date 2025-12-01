@@ -17,7 +17,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import group10.excel.CapacityRequest;
 import group10.excel.ExcelReader;
-import group10.excel.RealisedCapacity;
+import group10.excel.RealizedCapacity;
 import group10.excel.Temperature;
 
 /**
@@ -134,10 +134,10 @@ class ExcelReaderTest {
         });
 
         ExcelReader reader = new ExcelReader(xlsx);
-        List<RealisedCapacity> output = reader.warehouseCapacity("DENMARK", 2025);
+        List<RealizedCapacity> output = reader.warehouseCapacity("DENMARK", 2025);
 
         assertEquals(1, output.size(), "Only Denmark 2025 row should pass");
-        RealisedCapacity req = output.get(0);
+        RealizedCapacity req = output.get(0);
         assertEquals(20000, req.getPalletAmount());
         assertEquals(Temperature.AMBIENT, req.getTemperature());
         assertEquals("PS PAC I", req.getWarehouse().getName());
@@ -148,15 +148,15 @@ class ExcelReaderTest {
      * Tests that warehouse rows with zero or negative capacity are skipped
      */
     @Test
-    void skipsRowsWithRealisedCapacityZeroOrNegative() throws Exception {
+    void skipsRowsWithRealizedCapacityZeroOrNegative() throws Exception {
         File xlsx = makeWorkbook("Sheet1", sh -> {
             createWarehouseRow(sh, 1, "Denmark", 0, 2025, "Ambient", "PS PAC I", 0);
             createWarehouseRow(sh, 2, "DENMARK", 0, 2025, "Ambient", "KN Durham 2", -5);
         });
 
         ExcelReader reader = new ExcelReader(xlsx);
-        List<RealisedCapacity> out = reader.warehouseCapacity("Denmark", 2025);
-        assertTrue(out.isEmpty(), "No rows should pass when realised capacity <= 0");
+        List<RealizedCapacity> out = reader.warehouseCapacity("Denmark", 2025);
+        assertTrue(out.isEmpty(), "No rows should pass when realized capacity <= 0");
     }
 
     /**
@@ -169,7 +169,7 @@ class ExcelReaderTest {
         });
 
         ExcelReader reader = new ExcelReader(xlsx);
-        List<RealisedCapacity> out = reader.warehouseCapacity("Denmark", 2025);
+        List<RealizedCapacity> out = reader.warehouseCapacity("Denmark", 2025);
         assertTrue(out.isEmpty(), "Invalid temperature should be rejected");
     }
 
@@ -183,7 +183,7 @@ class ExcelReaderTest {
         });
 
         ExcelReader reader = new ExcelReader(xlsx);
-        List<RealisedCapacity> out = reader.warehouseCapacity("DENMARK", 2025);
+        List<RealizedCapacity> out = reader.warehouseCapacity("DENMARK", 2025);
         assertEquals(1, out.size());
         assertEquals(Temperature.AMBIENT, out.get(0).getTemperature());
         assertEquals(2025, out.get(0).getYear());
