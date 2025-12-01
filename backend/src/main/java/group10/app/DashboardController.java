@@ -2,7 +2,7 @@ package group10.app;
 
 import group10.dashboard.DashboardService;
 import group10.dashboard.WarehouseDashboard;
-import group10.excel.RealisedCapacity;
+import group10.excel.RealizedCapacity;
 import group10.excel.Result;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,7 +33,7 @@ public class DashboardController {
             return Collections.emptyList();
         }
 
-        List<RealisedCapacity> capacities = allocationState.getLastCapacities();
+        List<RealizedCapacity> capacities = allocationState.getLastCapacities();
         List<Result> results = allocationState.getLastResults();
 
         return dashboardService.buildDashboard(capacities, results);

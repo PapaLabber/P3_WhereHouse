@@ -15,47 +15,48 @@ const WarehouseDashboardComponent: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        // const res = await fetch("/api/dashboard");
-        // if (!res.ok) {
-        //   throw new Error(`HTTP error ${res.status}`);
-        // }
+        const res = await fetch("/api/dashboard");
+        if (!res.ok) {
+          throw new Error(`HTTP error ${res.status}`);
+        }
 
-        // const json = (await res.json()) as WarehouseDashboard[];
-        // setData(json);
+        const json = (await res.json()) as WarehouseDashboard[];
+        setData(json);
 
-        // if (json.length > 0) {
-        //   setSelected(json[0]);
-        // }
+        if (json.length > 0) {
+          setSelected(json[0]);
+        }
 
-  const mock: WarehouseDashboard[] = [
-  {
-    warehouseName: "PS HUB",
-    totalCapacity: 4000,
-    usedCapacity: 3100,
-    remainingCapacity: 900,
-    utilisationPercent: 77.5,
-    temperatureDashboard: {
-      ambient: 2000,
-      cold: 900,
-      freeze: 200
-    }
-  },
-  {
-    warehouseName: "PS PAC I",
-    totalCapacity: 5000,
-    usedCapacity: 3900,
-    remainingCapacity: 1100,
-    utilisationPercent: 78,
-    temperatureDashboard: {
-      ambient: 2100,
-      cold: 1300,
-      freeze: 500
-    }
-  }
-];
+//   const mock: WarehouseDashboard[] = [
+//   {
+//     warehouseName: "PS HUB",
+//     totalCapacity: 4000,
+//     usedCapacity: 3100,
+//     remainingCapacity: 900,
+//     utilisationPercent: 77.5,
+//     temperatureDashboard: {
+//       ambient: 2000,
+//       cold: 900,
+//       freeze: 200
+//     }
+//   },
+//   {
+//     warehouseName: "PS PAC I",
+//     totalCapacity: 5000,
+//     usedCapacity: 3900,
+//     remainingCapacity: 1100,
+//     utilisationPercent: 78,
+//     temperatureDashboard: {
+//       ambient: 2100,
+//       cold: 1300,
+//       freeze: 500
+//     }
+//   }
+// ];
 
-setData(mock);
-setSelected(mock[0]);
+// setData(mock);
+// setSelected(mock[0]);
+
       } catch (err) {
         console.error(err);
         setError("Failed to load dashboard data.");

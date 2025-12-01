@@ -5,6 +5,7 @@ import { ResultsDownload } from "./components/ResultsDownload";
 import { processDataFromBackend, type ProcessedResult } from "./utils/dataProcessor";
 import { Warehouse } from "lucide-react";
 import { DropdownSelect, type Option } from "./components/DropdownSelect";
+import WarehouseDashboardComponent from "./components/WarehouseDashboard";
 
 type Country = "DENMARK" | "SWEDEN" | "NORWAY";
 type Year = "2024" | "2025" | "2026";

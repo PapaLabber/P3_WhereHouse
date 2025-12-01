@@ -1,6 +1,6 @@
 package group10.dashboard;
 
-import group10.excel.RealisedCapacity;
+import group10.excel.RealizedCapacity;
 import group10.excel.Result;
 import group10.excel.Temperature;
 import group10.excel.Warehouse;
@@ -20,7 +20,7 @@ public class DashboardService {
      * Build the dashboard view from the realised capacities (total capacity)
      * and allocation results (used capacity).
      */
-    public List<WarehouseDashboard> buildDashboard(List<RealisedCapacity> capacities,
+    public List<WarehouseDashboard> buildDashboard(List<RealizedCapacity> capacities,
                                                    List<Result> results) {
 
         if (capacities == null) {
@@ -33,8 +33,8 @@ public class DashboardService {
         // 1) Total capacity per warehouse
         Map<Warehouse, Integer> totalCapacityByWarehouse = capacities.stream()
                 .collect(Collectors.groupingBy(
-                        RealisedCapacity::getWarehouse,
-                        Collectors.summingInt(RealisedCapacity::getPalletAmount)
+                        RealizedCapacity::getWarehouse,
+                        Collectors.summingInt(RealizedCapacity::getPalletAmount)
                 ));
 
         // 2) Used capacity per warehouse + per temperature
