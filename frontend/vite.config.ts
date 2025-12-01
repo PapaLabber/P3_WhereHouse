@@ -54,7 +54,10 @@
       outDir: 'build',
     },
     server: {
-      port: 3000,
+      port: 8080,
       open: true,
+      proxy: {
+        "api": "http://localhost:8080"
+      },
     },
   });

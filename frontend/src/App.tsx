@@ -37,7 +37,7 @@ export default function App() {
     if (country && year) handleProcess();
   };
 
-  const API = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+  const API = "http://localhost:8080";
 
   const handleProcess = useCallback(async () => {
     if (!selectedFile || !country || !year) return;
@@ -46,32 +46,46 @@ export default function App() {
     try {
       const form = new FormData();
       form.append("file", selectedFile, selectedFile.name);
-      form.append("wantedCountry", country);
-      form.append("wantedYear", year.toString());
 
-      const res = await fetch(`${API}/api/export`, { method: "POST", body: form });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      // Tilpas disse to linjer til hvad backend forventer:
+      // Eksempel: hvis Country er et objekt med 'code' felt:
+      form.append("wantedCountry", (country as any).code ?? String(country));
+      form.append("wantedYear", String(year));
+
+      const res = await fetch(`${API}/api/export`, {
+        method: "POST",
+        body: form,
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error("Export failed", res.status, text);
+        alert(`Download fejlede (HTTP ${res.status}). Se console for detaljer.`);
+        return;
+      }
 
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
+      if (!blob || blob.size === 0) {
+        console.error("Empty blob received");
+        alert("Modtog en tom fil fra serveren.");
+        return;
+      }
 
+      const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `AllocatedResult${country}${year}.xlsx`;
+      a.download = `AllocatedResult-${(country as any).code ?? country}-${year}.xlsx`;
+      document.body.appendChild(a);
       a.click();
-
+      a.remove();
       URL.revokeObjectURL(url);
     } catch (err) {
-      console.error(err);
+      console.error("Error while downloading file", err);
+      alert("Der opstod en fejl under download. Se console for detaljer.");
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
-  }, [selectedFile, country, year, API]);
-
-  useEffect(() => {
-    if (selectedFile && country && year) {
-      handleProcess();
-    }
-  }, [selectedFile, country, year, handleProcess]);
+  }, [selectedFile, country, year]);
 
   const handleDownload = () => {
     handleProcess(); // re-download from backend
