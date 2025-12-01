@@ -30,85 +30,85 @@ import group10.excel.Result;
 @RequestMapping("/api")
 public class Controller {
 
-    @Value("${app.output-dir:./outputFile}")
-    private String outputDirPath;
+  @Value("${app.output-dir:./outputFile}")
+  private String outputDirPath;
 
-    @Autowired
-    private OutputResult outputResult;
+  @Autowired
+  private OutputResult outputResult;
 
-    @Autowired
-    private WarehouseAllocator allocator;
+  @Autowired
+  private WarehouseAllocator allocator;
 
-    @PostMapping("/export")
-    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file,
-                                    @RequestParam("wantedCountry") String wantedCountry,
-                                    @RequestParam("wantedYear") int wantedYear)
-            throws IOException, InvalidFormatException {
+  @PostMapping("/export")
+  public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file,
+      @RequestParam("wantedCountry") String wantedCountry,
+      @RequestParam("wantedYear") int wantedYear)
+      throws IOException, InvalidFormatException {
 
-        // 1) Tjek fil
-        if (file == null || file.isEmpty()) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("No file uploaded.");
-        }
-
-        String originalName = file.getOriginalFilename();
-        if (originalName == null || !originalName.toLowerCase().endsWith(".xlsx")) {
-            return ResponseEntity
-                    .badRequest()
-                    .body("Invalid file. Please upload an .xlsx file.");
-        }
-
-        // 2) Generér outputfilnavn "AllocatedResult<år><land>.xlsx"
-        String fileName = "AllocatedResult" + wantedYear + wantedCountry + ".xlsx";
-
-        File tempFile = null;
-
-        try {
-            // 3) Gem upload midlertidigt
-            tempFile = File.createTempFile("upload-", ".xlsx");
-            file.transferTo(tempFile);
-
-            // 4) Læs data fra Excel via ExcelReader
-            ExcelReader reader = new ExcelReader(tempFile);
-
-            // CapacityRequests filtreret på land og år
-            List<CapacityRequest> requests = reader.filterRequest(wantedCountry, wantedYear);
-            // RealizedCapacity (lagerkapacitet)
-            List<RealizedCapacity> capacities = reader.getRealizedCap();
-
-            // 5) Kør OR-Tools algoritmen
-            List<Result> results = allocator.Allocator(requests, capacities);
-
-            // 6) Skriv resultater til excel med OutputResult
-            Path outputPath = outputResult.writeResultsToExcel(results, fileName);
-            
-            // TODO: Melih have fuldkommen styr på hvad der sker
-            // 7) Returnér filen som download 
-            File outputFile = outputPath.toFile();
-            if (!outputFile.exists()) {
-                return ResponseEntity
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Output file could not be created.");
-            }
-
-            Resource resource = new FileSystemResource(outputFile);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION,
-                    "attachment; filename=\"" + outputFile.getName() + "\"");
-            headers.add(HttpHeaders.CONTENT_TYPE,
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(resource);
-
-        } finally {
-            // 8) Ryd op midlertidig fil (valgfrit)
-            if (tempFile != null && tempFile.exists()) {
-                // tempFile.delete();
-            }
-        }
+    // 1) Tjek fil
+    if (file == null || file.isEmpty()) {
+      return ResponseEntity
+          .status(HttpStatus.BAD_REQUEST)
+          .body("No file uploaded.");
     }
+
+    String originalName = file.getOriginalFilename();
+    if (originalName == null || !originalName.toLowerCase().endsWith(".xlsx")) {
+      return ResponseEntity
+          .badRequest()
+          .body("Invalid file. Please upload an .xlsx file.");
+    }
+
+    // 2) Generér outputfilnavn "AllocatedResult<år><land>.xlsx"
+    String fileName = "AllocatedResult" + wantedYear + wantedCountry + ".xlsx";
+
+    File tempFile = null;
+
+    try {
+      // 3) Gem upload midlertidigt
+      tempFile = File.createTempFile("upload-", ".xlsx");
+      file.transferTo(tempFile);
+
+      // 4) Læs data fra Excel via ExcelReader
+      ExcelReader reader = new ExcelReader(tempFile);
+
+      // CapacityRequests filtreret på land og år
+      List<CapacityRequest> requests = reader.filterRequest(wantedCountry, wantedYear);
+      // RealizedCapacity (lagerkapacitet)
+      List<RealizedCapacity> capacities = reader.getRealizedCap(wantedCountry, wantedYear);
+
+      // 5) Kør OR-Tools algoritmen
+      List<Result> results = allocator.Allocator(requests, capacities);
+
+      // 6) Skriv resultater til excel med OutputResult
+      Path outputPath = outputResult.writeResultsToExcel(results, fileName);
+
+      // TODO: Melih have fuldkommen styr på hvad der sker
+      // 7) Returnér filen som download
+      File outputFile = outputPath.toFile();
+      if (!outputFile.exists()) {
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Output file could not be created.");
+      }
+
+      Resource resource = new FileSystemResource(outputFile);
+
+      HttpHeaders headers = new HttpHeaders();
+      headers.add(HttpHeaders.CONTENT_DISPOSITION,
+          "attachment; filename=\"" + outputFile.getName() + "\"");
+      headers.add(HttpHeaders.CONTENT_TYPE,
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+      return ResponseEntity.ok()
+          .headers(headers)
+          .body(resource);
+
+    } finally {
+      // 8) Ryd op midlertidig fil (valgfrit)
+      if (tempFile != null && tempFile.exists()) {
+        // tempFile.delete();
+      }
+    }
+  }
 }
