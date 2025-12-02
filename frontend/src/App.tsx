@@ -7,7 +7,7 @@ import { Warehouse } from "lucide-react";
 import { DropdownSelect, type Option } from "./components/DropdownSelect";
 
 type Country = "DENMARK" | "SWEDEN" | "NORWAY";
-type Year = "2024" | "2025" | "2026";
+type Year = "2025" | "2026" | "2027";
 
 const COUNTRY_OPTIONS: Option<Country>[] = [
   { label: "Denmark", value: "DENMARK" },
@@ -16,9 +16,9 @@ const COUNTRY_OPTIONS: Option<Country>[] = [
 ];
 
 const YEAR_OPTIONS: Option<Year>[] = [
-  { label: "2024", value: "2024" },
   { label: "2025", value: "2025" },
-  { label: "2026", value: "2026", disabled: true },
+  { label: "2026", value: "2026" },
+  { label: "2027", value: "2027", disabled: true },
 ];
 
 export default function App() {
@@ -128,32 +128,47 @@ export default function App() {
 
           {/* Right Column */}
           <div className="space-y-7">
-            <div>
-              <h2 className="text-xl font-semibold text-[#001965] mb-4">
-                Step 1: Filter your search
+            <div className="border border-border bg-card rounded-lg p-6">
+              <h2 className="text-xl font-semibold text-[#001965] mb-3">
+                Step 1: Select Country &amp; Year
               </h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Choose the country and year for which you want to allocate your addresses.
+              </p>
 
-              <div className="grid gap-6 md:grid-cols-3">
-                <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-                  <h3 className="text-[#001965] font-medium mb-2">Country</h3>
-                  <DropdownSelect
-                    label=""
-                    value={country}
-                    onChange={setCountry}
-                    options={COUNTRY_OPTIONS}
-                    placeholder="Choose a country"
-                  />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium text-[#001965]">
+                    Country
+                  </label>
+                  <select
+                    className="border border-border rounded-md bg-input-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    value={country ?? ""}
+                    onChange={(e) => setCountry(e.target.value as Country)}
+                  >
+                    <option value="">Select country</option>
+                    <option value="DENMARK">Denmark</option>
+                    <option value="SWEDEN">Sweden</option>
+                    <option value="NORWAY">Norway</option>
+                    {/* dine øvrige lande */}
+                  </select>
                 </div>
 
-                <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-                  <h3 className="text-[#001965] font-medium mb-2">Year</h3>
-                  <DropdownSelect
-                    label=""
-                    value={year}
-                    onChange={setYear}
-                    options={YEAR_OPTIONS}
-                    placeholder="Pick a year"
-                  />
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium text-[#001965]">
+                    Year
+                  </label>
+                  <select
+                    className="border border-border rounded-md bg-input-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    value={year ?? ""}
+                    onChange={(e) => setYear(e.target.value as Year)}
+                  >
+                    <option value="">Select year</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                    {/* dine øvrige år */}
+                  </select>
                 </div>
               </div>
             </div>
@@ -177,7 +192,6 @@ export default function App() {
                 filesize={selectedFile?.size}
                 onDownload={handleDownload}
               />
-
             </div>
           </div>
         </div>

@@ -187,3 +187,8 @@
 html {
   font-size: var(--font-size);
 }
+
+.step-box {
+  border: 1px solid var(--border);
+  background: var(--card);
+}
