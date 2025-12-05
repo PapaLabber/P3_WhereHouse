@@ -4,6 +4,7 @@ import group10.dashboard.DashboardService;
 import group10.dashboard.WarehouseDashboard;
 import group10.excel.RealizedCapacity;
 import group10.excel.Result;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,6 +16,7 @@ import java.util.List;
  * Frontend calls GET /api/dashboard to retrieve the current view.
  */
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 public class DashboardController {
 
     private final DashboardService dashboardService;
@@ -26,10 +28,14 @@ public class DashboardController {
         this.allocationState = allocationState;
     }
 
+    /**
+     * Returns the dashboard data for the last allocation run.
+     * If no allocation has been run yet, returns an empty list.
+     */
     @GetMapping("/api/dashboard")
     public List<WarehouseDashboard> getDashboard() {
         if (!allocationState.hasData()) {
-            // Either return empty list or throw 404/400, depending on your preference
+            // No data available yet (no file processed / algorithm not run)
             return Collections.emptyList();
         }
 

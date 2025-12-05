@@ -15,7 +15,10 @@ const WarehouseDashboardComponent: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const res = await fetch("/api/dashboard");
+        const API = "http://localhost:8080";
+
+        const res = await fetch(`${API}/api/dashboard`);
+
         if (!res.ok) {
           throw new Error(`HTTP error ${res.status}`);
         }
