@@ -9,6 +9,9 @@ const WarehouseDashboardComponent: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+ 
+
+
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
@@ -30,36 +33,6 @@ const WarehouseDashboardComponent: React.FC = () => {
           setSelected(json[0]);
         }
 
-//   const mock: WarehouseDashboard[] = [
-//   {
-//     warehouseName: "PS HUB",
-//     totalCapacity: 4000,
-//     usedCapacity: 3100,
-//     remainingCapacity: 900,
-//     utilisationPercent: 77.5,
-//     temperatureDashboard: {
-//       ambient: 2000,
-//       cold: 900,
-//       freeze: 200
-//     }
-//   },
-//   {
-//     warehouseName: "PS PAC I",
-//     totalCapacity: 5000,
-//     usedCapacity: 3900,
-//     remainingCapacity: 1100,
-//     utilisationPercent: 78,
-//     temperatureDashboard: {
-//       ambient: 2100,
-//       cold: 1300,
-//       freeze: 500
-//     }
-//   }
-// ];
-
-// setData(mock);
-// setSelected(mock[0]);
-
       } catch (err) {
         console.error(err);
         setError("Failed to load dashboard data.");
@@ -67,9 +40,12 @@ const WarehouseDashboardComponent: React.FC = () => {
         setLoading(false);
       }
     };
+    
 
     fetchDashboard();
   }, []);
+
+  
 
   if (loading) return <div>Loading dashboard...</div>;
   if (error) return <div style={{ color: "red" }}>{error}</div>;

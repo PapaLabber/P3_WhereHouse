@@ -4,6 +4,8 @@ import group10.dashboard.DashboardService;
 import group10.dashboard.WarehouseDashboard;
 import group10.excel.RealizedCapacity;
 import group10.excel.Result;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +22,10 @@ import java.util.List;
 public class DashboardController {
 
     private final DashboardService dashboardService;
+
+    @Autowired
     private final AllocationState allocationState;
+
 
     public DashboardController(DashboardService dashboardService,
                                AllocationState allocationState) {

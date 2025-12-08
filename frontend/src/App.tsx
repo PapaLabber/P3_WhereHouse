@@ -65,6 +65,7 @@ export default function App() {
         return;
       }
 
+
       const blob = await res.blob();
       if (!blob || blob.size === 0) {
         console.error("Empty blob received");
