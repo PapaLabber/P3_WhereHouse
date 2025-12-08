@@ -202,7 +202,7 @@ export default function App() {
         <h2 className="text-xl font-semibold text-[#001965] mb-4">
           Dashboard
         </h2>
-        <WarehouseDashboardComponent />
+        <WarehouseDashboardComponent isProcessing={isProcessing} />
       </section>
 
     </main>

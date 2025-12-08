@@ -3,47 +3,58 @@
 import React, { useEffect, useState } from "react";
 import { WarehouseDashboard } from "../types/dashboard";
 
-const WarehouseDashboardComponent: React.FC = () => {
+interface WarehouseDashboardProps {
+  isProcessing: boolean;
+}
+
+const WarehouseDashboardComponent: React.FC<WarehouseDashboardProps> = ({
+  isProcessing,
+}) => {
   const [data, setData] = useState<WarehouseDashboard[]>([]);
   const [selected, setSelected] = useState<WarehouseDashboard | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
- 
+  const API = "http://localhost:8080";
 
+  const fetchDashboard = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+      const res = await fetch(`${API}/api/dashboard`);
 
-        const API = "http://localhost:8080";
-
-        const res = await fetch(`${API}/api/dashboard`);
-
-        if (!res.ok) {
-          throw new Error(`HTTP error ${res.status}`);
-        }
-
-        const json = (await res.json()) as WarehouseDashboard[];
-        setData(json);
-
-        if (json.length > 0) {
-          setSelected(json[0]);
-        }
-
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load dashboard data.");
-      } finally {
-        setLoading(false);
+      if (!res.ok) {
+        throw new Error(`HTTP error ${res.status}`);
       }
-    };
-    
 
+      const json = (await res.json()) as WarehouseDashboard[];
+      setData(json);
+
+      if (json.length > 0) {
+        setSelected(json[0]);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load dashboard data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // original initial load
+  useEffect(() => {
     fetchDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // 🔁 reload when processing finishes
+  useEffect(() => {
+    // only refetch when processing goes from true → false
+    if (!isProcessing) {
+      fetchDashboard();
+    }
+  }, [isProcessing]);
 
   
 
