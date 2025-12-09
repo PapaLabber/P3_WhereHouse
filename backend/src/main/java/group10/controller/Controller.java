@@ -20,12 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import group10.algorithms.WarehouseAllocator;
+import group10.app.AllocationState;
 import group10.excel.CapacityRequest;
 import group10.excel.ExcelReader;
 import group10.excel.OutputResult;
 import group10.excel.RealizedCapacity;
 import group10.excel.Result;
-import group10.app.AllocationState;
 
 @RestController
 @RequestMapping("/api")
@@ -84,7 +84,7 @@ public class Controller {
       // 5) Kør OR-Tools algoritmen
       List<Result> results = allocator.Allocator(requests, capacities);
     
-      allState.update(capacities, results);
+      //allState.update(capacities, results);
 
       // 6) Skriv resultater til excel med OutputResult
       Path outputPath = outputResult.writeResultsToExcel(results, fileName);

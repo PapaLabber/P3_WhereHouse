@@ -1,17 +1,17 @@
 package group10.app;
 
-import group10.dashboard.DashboardService;
-import group10.dashboard.WarehouseDashboard;
-import group10.excel.RealizedCapacity;
-import group10.excel.Result;
+import java.util.Collections;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
-import java.util.List;
+import group10.dashboard.DashboardService;
+import group10.dashboard.DashboardService.WarehouseDashboard;
+import group10.excel.RealizedCapacity;
+import group10.excel.Result;
 
 /**
  * REST controller exposing the dashboard API.

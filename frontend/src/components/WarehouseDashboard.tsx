@@ -136,22 +136,10 @@ const WarehouseDashboardComponent: React.FC<WarehouseDashboardProps> = ({
 
             <h3 style={{ marginTop: "1.5rem" }}>Temperature</h3>
 
-            {renderTempBar(
-              "Ambient",
-              selected.temperatureDashboard.ambient,
-              selected.usedCapacity
-            )}
-            {renderTempBar(
-              "Cold",
-              selected.temperatureDashboard.cold,
-              selected.usedCapacity
-            )}
-            {renderTempBar(
-              "Freeze",
-              selected.temperatureDashboard.freeze,
-              selected.usedCapacity
-            )}
-          </>
+              {renderTempBar("Ambient", selected.ambient, selected.usedCapacity)}
+              {renderTempBar("Cold", selected.cold, selected.usedCapacity)}
+              {renderTempBar("Freeze", selected.freeze, selected.usedCapacity)}
+            </>
         )}
       </div>
     </div>
