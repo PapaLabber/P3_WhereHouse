@@ -60,7 +60,8 @@ const WarehouseDashboardComponent: React.FC<WarehouseDashboardProps> = ({
 
   if (loading) return <div>Loading dashboard...</div>;
   if (error) return <div style={{ color: "red" }}>{error}</div>;
-  if (data.length === 0) return <div>No dashboard data available.</div>;
+  if (data.length === 0) return <div>No dashboard data available or failed to run.</div>;
+
 
   return (
     <div

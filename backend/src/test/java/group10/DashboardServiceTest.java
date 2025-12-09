@@ -5,7 +5,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import org.junit.jupiter.api.Test;
 
 import group10.dashboard.DashboardService;
@@ -90,5 +89,4 @@ class DashboardServiceTest {
         assertNotNull(dashboards, "Dashboard list should not be null");
         assertEquals(0, dashboards.size(), "No capacities means no dashboard entries");
     }
-
 }
