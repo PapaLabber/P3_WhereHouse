@@ -62,8 +62,9 @@ import { env } from 'process';
       },
     },
     test: {
-      environment: 'jsdom',
+      environment: 'happy-dom',
       setupFiles: './src/test/setupTests.ts',
       include: ['src/**/*.test.{ts,tsx}'],
+      globals: true
     },
   });

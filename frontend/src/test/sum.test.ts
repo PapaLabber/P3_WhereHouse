@@ -1,6 +1,8 @@
-import { expect, test } from 'vitest'
-import { sum } from '../components/utils/sum'
+import { describe, it, expect } from 'vitest';
+import { sum } from '../components/utils/sum';
 
-test('adds 1 + 2 to equal 3', () => {
-  expect(sum(1, 2)).toBe(3)
-})
+describe('sum', () => {
+  it('adds numbers', () => {
+    expect(sum(1, 2)).toBe(3);
+  });
+});

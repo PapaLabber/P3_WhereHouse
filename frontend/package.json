@@ -47,16 +47,22 @@
             "vaul": "^1.1.2"
       },
       "devDependencies": {
+            "@testing-library/jest-dom": "^6.9.1",
+            "@testing-library/react": "^16.3.0",
             "@types/node": "^20.10.0",
             "@types/react": "^19.2.3",
             "@types/react-dom": "^19.2.3",
-            "@vitejs/plugin-react-swc": "^3.10.2",
-            "vite": "^6.4.1"
+            "@vitejs/plugin-react-swc": "3.11.0",
+            "happy-dom": "^20.0.11",
+            "jsdom": "^27.0.1",
+            "vite": "5.4.1",
+            "vitest": "^4.0.15"
       },
       "scripts": {
             "dev": "vite",
             "build": "vite build",
-            "test": "vitest"
+            "test": "vitest",
+            "test:run": "vitest run"
       },
       "proxy": "http://localhost:8080"
 }
