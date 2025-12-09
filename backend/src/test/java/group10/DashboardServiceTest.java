@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
 
 import group10.dashboard.DashboardService;
+import group10.dashboard.DashboardService.WarehouseDashboard;
 import group10.excel.CapacityRequest;
 import group10.excel.ProductionSite;
 import group10.excel.RealizedCapacity;
@@ -71,4 +74,21 @@ class DashboardServiceTest {
         assertEquals(10, second.getFreeze());
         assertEquals(20.0, second.getUtilisationPercent(), 0.0001);
     }
+
+    @Test
+    void buildDashboard_failure() {
+        DashboardService service = new DashboardService();
+
+        // empty capacities, no warehouses exist, no dashboard entries
+        List<RealizedCapacity> capacities = new ArrayList<>();
+        List<Result> results = new ArrayList<>();
+
+        // Act
+        List<WarehouseDashboard> dashboards = service.buildDashboard(capacities, results);
+
+        // Assert
+        assertNotNull(dashboards, "Dashboard list should not be null");
+        assertEquals(0, dashboards.size(), "No capacities means no dashboard entries");
+    }
+
 }
