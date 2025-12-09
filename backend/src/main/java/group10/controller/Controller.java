@@ -3,6 +3,8 @@ package group10.controller;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -13,6 +15,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,7 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import group10.algorithms.WarehouseAllocator;
-import group10.app.AllocationState;
+import group10.dashboard.DashboardService;
+import group10.dashboard.DashboardService.WarehouseDashboard;
 import group10.excel.CapacityRequest;
 import group10.excel.ExcelReader;
 import group10.excel.OutputResult;
@@ -29,6 +34,7 @@ import group10.excel.Result;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "http://localhost:3000")
 public class Controller {
 
   @Value("${app.output-dir:./outputFile}")
@@ -41,12 +47,15 @@ public class Controller {
   private WarehouseAllocator allocator;
 
   @Autowired
-  private AllocationState allState;
+  private DashboardService dashboardService;
+
+  private List<RealizedCapacity> lastCapacities = new ArrayList<>();
+  private List<Result> lastResults = new ArrayList<>();
 
   @PostMapping("/export")
   public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file,
-      @RequestParam("wantedCountry") String wantedCountry,
-      @RequestParam("wantedYear") int wantedYear)
+                                  @RequestParam("wantedCountry") String wantedCountry,
+                                  @RequestParam("wantedYear") int wantedYear)
       throws IOException, InvalidFormatException {
 
     // 1) Tjek fil
@@ -76,21 +85,21 @@ public class Controller {
       // 4) Læs data fra Excel via ExcelReader
       ExcelReader reader = new ExcelReader(tempFile);
 
-      // CapacityRequests filtreret på land og år
       List<CapacityRequest> requests = reader.filterRequest(wantedCountry, wantedYear);
-      // RealizedCapacity (lagerkapacitet)
       List<RealizedCapacity> capacities = reader.getRealizedCap(wantedCountry, wantedYear);
 
       // 5) Kør OR-Tools algoritmen
       List<Result> results = allocator.Allocator(requests, capacities);
-    
-      //allState.update(capacities, results);
+
+      // opdater for getDashboard
+      synchronized (this) {
+        this.lastCapacities = capacities;
+        this.lastResults = results;
+      }
 
       // 6) Skriv resultater til excel med OutputResult
       Path outputPath = outputResult.writeResultsToExcel(results, fileName);
 
-      // TODO: Melih have fuldkommen styr på hvad der sker
-      // 7) Returnér filen som download
       File outputFile = outputPath.toFile();
       if (!outputFile.exists()) {
         return ResponseEntity
@@ -111,10 +120,19 @@ public class Controller {
           .body(resource);
 
     } finally {
-      // 8) Ryd op midlertidig fil (valgfrit)
       if (tempFile != null && tempFile.exists()) {
         // tempFile.delete();
       }
     }
+  }
+
+  // export dashboard data
+  @GetMapping("/dashboard")
+  public synchronized List<WarehouseDashboard> getDashboard() {
+    if (lastCapacities.isEmpty() || lastResults.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    return dashboardService.buildDashboard(lastCapacities, lastResults);
   }
 }
