@@ -68,7 +68,7 @@ public class WarehouseAllocator {
 
     // -- 4) Warehouse capacities: sum_r x[r][c] <= capacity_c --
     for (int c = 0; c < C; ++c) {
-      MPConstraint constraint = solver.makeConstraint(0.0, realisedCap.get(c).getPalletAmount(), "cap_" + c);
+      MPConstraint constraint = solver.makeConstraint(0.0, realisedCap.get(c).getPalletAmount()*0.8, "cap_" + c);
       for (int r = 0; r < R; ++r) {
         constraint.setCoefficient(x[r][c], 1.0);
       }
