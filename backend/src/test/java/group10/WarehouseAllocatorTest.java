@@ -32,9 +32,9 @@ class WarehouseAllocatorTest {
         List<CapacityRequest> requests = new ArrayList<>();
         List<RealizedCapacity> realisedCap = new ArrayList<>();
 
-        requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
-        requests.add(new CapacityRequest(100, Temperature.COLD, ProductionSite.fromName("Kalundborg"), 2, 2026));
-        requests.add(new CapacityRequest(100, Temperature.FREEZE, ProductionSite.fromName("Hjørring"), 3, 2026));
+        requests.add(new CapacityRequest(80, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
+        requests.add(new CapacityRequest(80, Temperature.COLD, ProductionSite.fromName("Kalundborg"), 2, 2026));
+        requests.add(new CapacityRequest(80, Temperature.FREEZE, ProductionSite.fromName("Hjørring"), 3, 2026));
 
         realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
         realisedCap.add(new RealizedCapacity(100, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
@@ -43,10 +43,13 @@ class WarehouseAllocatorTest {
         WarehouseAllocator allocator = new WarehouseAllocator();
 
         List<Result> result = allocator.Allocator(requests, realisedCap);
+
+        System.out.println(result);
+
         List<Result> expected = new ArrayList<>();
-        expected.add(new Result(Warehouse.fromName("PS PAC I"), Temperature.AMBIENT, 100, requests.get(0)));
-        expected.add(new Result(Warehouse.fromName("PS PAC II"), Temperature.COLD, 100, requests.get(1)));
-        expected.add(new Result(Warehouse.fromName("NEFF"), Temperature.FREEZE, 100, requests.get(2)));
+        expected.add(new Result(Warehouse.fromName("PS PAC I"), Temperature.AMBIENT, 80, requests.get(0)));
+        expected.add(new Result(Warehouse.fromName("PS PAC II"), Temperature.COLD, 80, requests.get(1)));
+        expected.add(new Result(Warehouse.fromName("NEFF"), Temperature.FREEZE, 80, requests.get(2)));
 
         assertEquals(expected.toString(), result.toString(), "Expected optimal solution for optimal problem");
     }
@@ -71,7 +74,7 @@ class WarehouseAllocatorTest {
         WarehouseAllocator allocator = new WarehouseAllocator();
 
         List<Result> result = allocator.Allocator(requests, realisedCap);
-        List<Result> expected = new ArrayList<>();
+        List<Result> expected = new ArrayList<>(); // No data mocked since no result is expected
 
         assertEquals(expected.toString(), result.toString(), "Expected no allocation for infeasible problem");
     }
@@ -84,7 +87,7 @@ class WarehouseAllocatorTest {
         List<CapacityRequest> requests = new ArrayList<>();
         List<RealizedCapacity> realisedCap = new ArrayList<>();
 
-        requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
+        requests.add(new CapacityRequest(80, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
 
         realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
 
@@ -93,7 +96,7 @@ class WarehouseAllocatorTest {
         List<Result> result = allocator.Allocator(requests, realisedCap);
         List<Result> expected = new ArrayList<>();
 
-        expected.add(new Result(Warehouse.fromName("PS PAC I"), Temperature.AMBIENT, 100, requests.get(0)));
+        expected.add(new Result(Warehouse.fromName("PS PAC I"), Temperature.AMBIENT, 80, requests.get(0)));
         
         assertEquals(expected.toString(), result.toString(), "Expected optimal solution for trivial problem");
     }
@@ -107,9 +110,9 @@ class WarehouseAllocatorTest {
         List<CapacityRequest> requests = new ArrayList<>();
         List<RealizedCapacity> realisedCap = new ArrayList<>();
 
-        requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
-        requests.add(new CapacityRequest(100, Temperature.COLD, ProductionSite.fromName("Kalundborg"), 2, 2026));
-        requests.add(new CapacityRequest(100, Temperature.FREEZE, ProductionSite.fromName("Hjørring"), 3, 2026));
+        requests.add(new CapacityRequest(80, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
+        requests.add(new CapacityRequest(80, Temperature.COLD, ProductionSite.fromName("Kalundborg"), 2, 2026));
+        requests.add(new CapacityRequest(80, Temperature.FREEZE, ProductionSite.fromName("Hjørring"), 3, 2026));
 
         realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
         realisedCap.add(new RealizedCapacity(100, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
@@ -124,9 +127,9 @@ class WarehouseAllocatorTest {
         List<Result> result = allocator.Allocator(requests, realisedCap);
         List<Result> expected = new ArrayList<>();
 
-        expected.add(new Result(Warehouse.fromName("PS PAC I"), Temperature.AMBIENT, 100, requests.get(0)));
-        expected.add(new Result(Warehouse.fromName("PS PAC II"), Temperature.COLD, 100, requests.get(1)));
-        expected.add(new Result(Warehouse.fromName("NEFF"), Temperature.FREEZE, 100, requests.get(2)));
+        expected.add(new Result(Warehouse.fromName("PS PAC I"), Temperature.AMBIENT, 80, requests.get(0)));
+        expected.add(new Result(Warehouse.fromName("PS PAC II"), Temperature.COLD, 80, requests.get(1)));
+        expected.add(new Result(Warehouse.fromName("NEFF"), Temperature.FREEZE, 80, requests.get(2)));
 
         assertEquals(expected.toString(), result.toString(), "Expected optimal solution with zero capacity constraints");
     }
@@ -140,7 +143,7 @@ class WarehouseAllocatorTest {
         List<CapacityRequest> requests = new ArrayList<>();
         List<RealizedCapacity> realisedCap = new ArrayList<>();
 
-        requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
+        requests.add(new CapacityRequest(80, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
 
         realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
         realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC II"), 2026));
@@ -150,7 +153,7 @@ class WarehouseAllocatorTest {
         List<Result> result = allocator.Allocator(requests, realisedCap);
         List<Result> expected = new ArrayList<>();
 
-        expected.add(new Result(Warehouse.fromName("PS PAC I"), Temperature.AMBIENT, 100, requests.get(0)));
+        expected.add(new Result(Warehouse.fromName("PS PAC I"), Temperature.AMBIENT, 80, requests.get(0)));
 
         assertEquals(expected.toString(), result.toString(), "Expected optimal solution using cheapest routes");
     }
@@ -166,7 +169,7 @@ class WarehouseAllocatorTest {
 
         requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
 
-        realisedCap.add(new RealizedCapacity(60, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
         realisedCap.add(new RealizedCapacity(40, Temperature.AMBIENT, Warehouse.fromName("PS PAC II"), 2026));
 
         WarehouseAllocator allocator = new WarehouseAllocator();
@@ -174,9 +177,38 @@ class WarehouseAllocatorTest {
         List<Result> result = allocator.Allocator(requests, realisedCap);
         List<Result> expected = new ArrayList<>();
 
-        expected.add(new Result(Warehouse.fromName("PS PAC I"), Temperature.AMBIENT, 60, requests.get(0)));
-        expected.add(new Result(Warehouse.fromName("PS PAC II"), Temperature.AMBIENT, 40, requests.get(0)));
+        expected.add(new Result(Warehouse.fromName("PS PAC I"), Temperature.AMBIENT, 80, requests.get(0)));
+        expected.add(new Result(Warehouse.fromName("PS PAC II"), Temperature.AMBIENT, 20, requests.get(0)));
 
         assertEquals(expected.toString(), result.toString(), "Expected optimal distribution across warehouses");
+    }
+
+    /*
+     * Test 7: computeDistances.
+     * 
+     */
+@Test
+    void computeTransportDistances_matchesExpected() {
+        List<CapacityRequest> requests = new ArrayList<>();
+        List<RealizedCapacity> realised = new ArrayList<>();
+
+        requests.add(new CapacityRequest(10, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
+        requests.add(new CapacityRequest(5, Temperature.COLD, ProductionSite.fromName("Kalundborg"), 2, 2026));
+
+        realised.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realised.add(new RealizedCapacity(50, Temperature.COLD, Warehouse.fromName("NEFF"), 2026));
+
+        double[][] matrix = WarehouseAllocator.computeTransportDistances(requests, realised);
+
+        // values
+        for (int c = 0; c < realised.size(); c++) {
+            for (int r = 0; r < requests.size(); r++) {
+                double expected = Math.hypot(
+                    realised.get(c).getWarehouse().getLongitude() - requests.get(r).getProductionSite().getLongitude(),
+                    realised.get(c).getWarehouse().getLatitude() - requests.get(r).getProductionSite().getLatitude()
+                );
+                assertEquals(expected, matrix[c][r], "Expected same distances found in method as above computation");
+            }
+        }
     }
 }

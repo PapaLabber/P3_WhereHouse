@@ -19,8 +19,7 @@ import group10.excel.Result;
 public class WarehouseAllocator {
 
     // add the new helper method inside the class (but outside Allocator)
-    private static double[][] computeTransportDistances(List<CapacityRequest> requests,
-            List<RealizedCapacity> realisedCap) {
+    public static double[][] computeTransportDistances(List<CapacityRequest> requests, List<RealizedCapacity> realisedCap) {
         int R = requests.size();
         int C = realisedCap.size();
         double[][] transportDistances = new double[C][R];
