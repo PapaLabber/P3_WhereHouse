@@ -15,9 +15,20 @@ import group10.excel.CapacityRequest;
 import group10.excel.RealizedCapacity;
 import group10.excel.Result;
 
-@Service // TODO: Forklar nærmere (Philippe)
+/**
+ * Algorithm for allocating space in warehouses and distributing product to warehouses closest to where its needed
+ * 
+ */
+@Service
 public class WarehouseAllocator {
 
+  /**
+   * Allocates space and distributes product to the warehouses closest to where they are being requested
+   * 
+   * @param requests list of requests from factories
+   * @param realisedCap amount of space available at warehouses
+   * @return a list of Result objects containing the the amount of product stored in each warehouse
+   */
   public List<Result> Allocator(List<CapacityRequest> requests, List<RealizedCapacity> realisedCap) {
 
     Loader.loadNativeLibraries(); // OR-Tools native libs

@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Represents one warehouse
+ */
 public class Warehouse {
 
     private String name;
@@ -94,6 +97,6 @@ public class Warehouse {
     }
 @Override
 public String toString() {
-    return this.name; // or String.format("%s (%.5f, %.5f)", name, latitude, longitude);
+    return String.format("%s (%.5f, %.5f)", name, latitude, longitude);
 }
 }

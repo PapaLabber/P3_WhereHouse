@@ -1,5 +1,8 @@
 package group10.excel;
 
+/**
+ * Respresents the result that will be written in the output Excel-file
+ */
 public class Result {
     private Warehouse warehouse;
     private Temperature temperature;
