@@ -69,6 +69,7 @@ out/
 # FRONTEND (React / Node)
 ########################################
 
+coverage/
 node_modules/
 dist/
 build/

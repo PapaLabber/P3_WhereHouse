@@ -53,6 +53,7 @@
             "@types/react": "^19.2.3",
             "@types/react-dom": "^19.2.3",
             "@vitejs/plugin-react-swc": "3.11.0",
+            "@vitest/coverage-istanbul": "^4.0.15",
             "happy-dom": "^20.0.11",
             "jsdom": "^27.0.1",
             "vite": "5.4.1",
@@ -62,7 +63,8 @@
             "dev": "vite",
             "build": "vite build",
             "test": "vitest",
-            "test:run": "vitest run"
+            "test:ui": "vitest --ui",
+            "test:coverage": "vitest --coverage"
       },
       "proxy": "http://localhost:8080"
 }

@@ -65,6 +65,9 @@ import { env } from 'process';
       environment: 'happy-dom',
       setupFiles: './src/test/setupTests.ts',
       include: ['src/**/*.test.{ts,tsx}'],
-      globals: true
+      globals: true,
+      coverage: {
+        provider: 'istanbul'
+      }
     },
   });
