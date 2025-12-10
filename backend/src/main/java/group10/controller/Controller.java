@@ -34,6 +34,7 @@ import group10.excel.ExcelReader;
 import group10.excel.OutputResult;
 import group10.excel.RealizedCapacity;
 import group10.excel.Result;
+import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * Springboot controller for routing requests from frontend
@@ -60,6 +61,16 @@ public class Controller {
 
   private List<RealizedCapacity> lastCapacities = new ArrayList<>();
   private List<Result> lastResults = new ArrayList<>();
+/* 
+  @GetMapping("/fillFilters")
+  public ResponseEntity<?> fillFilters() {
+    List<String> countryOptions = new ArrayList<>();
+    List<Integer> yearOptions = 
+
+    return ResponseEntity.ok()
+        .headers()
+        .body();
+  }*/
 
   /**
    * 

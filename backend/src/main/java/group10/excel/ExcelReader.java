@@ -22,19 +22,19 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
- * Reader til Excel-inputfilen.
+ * Reader for the Excel input file.
  *
- * Forudsætter et ark med kolonner som mindst:
+ * Expects a sheet with at least the following columns:
  * - "Country"
  * - "PalletAmount"
  * - "Year"
  * - "ProductionSite"
  * - "Temperature"
- * - "ID" (til requests)
+ * - "ID" (for requests)
  * - "Warehouse"
  * - "Capacity"
  *
- * Justér kolonnenavne her, hvis de hedder noget andet i din fil.
+ * Adjust column names here if your file uses different labels.
  */
 public class ExcelReader {
 
@@ -42,34 +42,40 @@ public class ExcelReader {
   private final Sheet sheet;
 
   public ExcelReader(File excelFile) throws InvalidFormatException, IOException {
-    this.workbook = new XSSFWorkbook(excelFile); // åbner .xlsx
-    this.sheet = workbook.getSheetAt(0); // bruger første sheet
+    this.workbook = new XSSFWorkbook(excelFile); // Opens .xlsx file
+    this.sheet = workbook.getSheetAt(0); // Uses first sheet
   }
 
   /**
-   * Filtrér alle CapacityRequest efter land og år.
-   * Bruger kolonner:
+   * Filters all CapacityRequest rows by country and year.
+   *
+   * Uses the following columns:
    * - "Country"
    * - "PalletAmount"
    * - "Year"
    * - "ProductionSite"
    * - "Temperature"
-   * - "ID"
+   * - "ID" (If used. Not necessary)
+   *
+   * @param wantedCountry filter by this country
+   * @param wantedYear    filter by this year
+   * @return list of valid CapacityRequest objects
+   * @throws IOException if workbook cannot be read
    */
   public List<CapacityRequest> filterRequest(String wantedCountry, int wantedYear) throws IOException {
     Iterator<Row> it = sheet.iterator();
-    if (!it.hasNext()) { // ingen rækker
+    if (!it.hasNext()) { // No rows
       workbook.close();
       return Collections.emptyList();
     }
 
-    // 1. Læs header-række og lav map: header -> kolonneindeks
+    // Read header row and build mapping: header -> column index
     Row headerRow = it.next();
     Map<String, Integer> colIndex = getHeaderIndexMap(headerRow); // TODO: kom tilbage (Mads)
 
     List<CapacityRequest> result = new ArrayList<>();
 
-    // 2. Gennemgå alle datarækker
+    // Iterate through all data rows
     while (it.hasNext()) {
       Row row = it.next();
       if (row == null) {
@@ -106,7 +112,7 @@ public class ExcelReader {
         continue;
       }
 
-      // ID (enten fra kolonnen "ID" eller fallback til rækkenummer)
+      // ID (uses column if present, otherwise fallback to row number)
       int id;
       if (colIndex.containsKey("ID")) {
         id = getIntCell(row, colIndex.get("ID"));
@@ -114,62 +120,73 @@ public class ExcelReader {
         id = row.getRowNum();
       }
 
-      // KORREKT konstruktor‑kald:
+      // Build CapacityRequest object
       CapacityRequest req = new CapacityRequest(
-          pallets, // int palletAmount
-          zone, // Temperature temperature
-          site, // ProductionSite productionSite
-          id, // int ID
-          year // int year
-      );
+          pallets,
+          zone,
+          site,
+          id,
+          year);
 
       result.add(req);
     }
-
+    // Close workbook after processing
     workbook.close();
     return result;
   }
 
   /**
-   * Læs alle RealizedCapacity fra samme sheet (uden filtrering).
-   * Bruger kolonner:
+   * Reads all RealizedCapacity rows from the sheet and filters by country and
+   * year.
+   * 
+   * Uses the following columns:
    * - "Warehouse"
    * - "Capacity"
    * - "Temperature"
    * - "Year"
+   *
+   * @param wantedCountry filter by this country
+   * @param wantedYear    filter by this year
+   * @return list of RealizedCapacity objects for the given filters
+   * @throws IOException if the workbook cannot be read
    */
   public List<RealizedCapacity> getRealizedCap(String wantedCountry, int wantedYear) throws IOException {
     Iterator<Row> it = sheet.iterator();
-    if (!it.hasNext()) { // no rows at all
+    if (!it.hasNext()) { // No rows available
       workbook.close();
       return Collections.emptyList();
     }
 
+    // Read header row and create header -> index mapping
     Row headerRow = it.next();
     Map<String, Integer> colIndex = getHeaderIndexMap(headerRow);
 
     List<RealizedCapacity> result = new ArrayList<>();
 
+    // Loop through all rows in the sheet
     while (it.hasNext()) {
       Row row = it.next();
       if (row == null) {
         continue;
       }
 
-      // Filter by Country
+      // Country
       String country = getStringCell(row, colIndex.get("Country"));
       if (country == null || !wantedCountry.equalsIgnoreCase(country.trim())) {
         continue;
       }
-      // Skip FP warehouses
-      Set<String> SKIP_WAREHOUSES = new HashSet<>(Arrays.asList("dsv", "ps hub"));
 
-      String warehouseCell = getStringCell(row, colIndex.get("Warehouse"));
-      if (warehouseCell != null && SKIP_WAREHOUSES.contains(warehouseCell.trim().toLowerCase(Locale.ROOT))) {
-        continue;
+      if (wantedCountry.toLowerCase() == "denmark") {
+        // Skip FP warehouses
+        Set<String> SKIP_WAREHOUSES = new HashSet<>(Arrays.asList("dsv", "ps hub"));
+
+        String warehouseCell = getStringCell(row, colIndex.get("Warehouse"));
+        if (warehouseCell != null && SKIP_WAREHOUSES.contains(warehouseCell.trim().toLowerCase(Locale.ROOT))) {
+          continue;
+        }
       }
 
-      // Filter by PalletAmount > 0
+      // PalletAmount > 0
       int pallets = getIntCell(row, colIndex.get("L&D Capacity (Physical pallet spaces)"));
       if (pallets <= 0) {
         continue;
@@ -181,11 +198,11 @@ public class ExcelReader {
         continue;
       }
 
-      // Parse Warehouse using the registry
+      // Warehouse lookup
       String warehouseName = getStringCell(row, colIndex.get("Warehouse"));
       Warehouse warehouse = Warehouse.fromName(warehouseName);
 
-      // Parse Temperature -> TemperatureZone enum
+      // Temperature lookup
       String tempRaw = getStringCell(row, colIndex.get("Temperature"));
       Temperature zone = Temperature.fromString(tempRaw);
       if (zone == null) {
@@ -200,33 +217,28 @@ public class ExcelReader {
           warehouse,
           year);
 
-      // G. Keep it
       result.add(req);
     }
+    // Close workbook after reading
     workbook.close();
     return result;
   }
 
   /**
-   * Bruges af tests (ExcelReaderTest).
-   * Returnerer en liste af RealizedCapacity filtreret på land og år.
-   *
-   * Hvis dine tests forventer noget andet filter (kun år, kun land osv.),
-   * kan du justere filtreringen her.
+   * Helper used for tests.
+   * Returns RealizedCapacity filtered by country and year.
    */
   public List<RealizedCapacity> warehouseCapacity(String wantedCountry, int wantedYear) throws IOException {
-    // Udgangspunkt: brug alle RealizedCapacity og filtrér
+    // Get all and apply additional filtering
     List<RealizedCapacity> all = getRealizedCap(wantedCountry, wantedYear);
     List<RealizedCapacity> filtered = new ArrayList<>();
 
     for (RealizedCapacity rc : all) {
-      // Filtrér på år
+      // Year filter
       if (rc.getYear() != wantedYear) {
         continue;
       }
 
-      // Hvis Warehouse har et land, kan du filtrere her.
-      // Eksempel (tilpas til din Warehouse-klasse):
       Warehouse wh = rc.getWarehouse();
       // Hvis Warehouse ikke har country, så fjern dette filter.
       // if (!wh.getCountry().equalsIgnoreCase(wantedCountry)) {
@@ -239,8 +251,72 @@ public class ExcelReader {
     return filtered;
   }
 
+  public List<String> extractCountry() throws IOException {
+    Iterator<Row> it = sheet.iterator();
+    if (!it.hasNext()) { // No rows
+      workbook.close();
+      return Collections.emptyList();
+    }
+
+    // Read header row and build mapping: header -> column index
+    Row headerRow = it.next();
+    Map<String, Integer> colIndex = getHeaderIndexMap(headerRow);
+
+    List<String> result = new ArrayList<>();
+
+    while (it.hasNext()) {
+      Row row = it.next();
+      if (row == null) {
+        continue;
+      }
+
+      // Country
+      String country = getStringCell(row, colIndex.get("Country"));
+      if (country == null || result.contains(country)) {
+        continue;
+      }
+
+      result.add(country);
+    }
+
+    workbook.close();
+    return result;
+  }
+
+  public List<Integer> extractYear() throws IOException {
+    Iterator<Row> it = sheet.iterator();
+    if (!it.hasNext()) { // No rows
+      workbook.close();
+      return Collections.emptyList();
+    }
+
+    // Read header row and build mapping: header -> column index
+    Row headerRow = it.next();
+    Map<String, Integer> colIndex = getHeaderIndexMap(headerRow);
+
+    List<Integer> result = new ArrayList<>();
+
+    while (it.hasNext()) {
+      Row row = it.next();
+      if (row == null) {
+        continue;
+      }
+
+      // Year
+      Integer year = getIntCell(row, colIndex.get("Year"));
+      if (year == null || result.contains(year)) {
+        continue;
+      }
+
+      result.add(year);
+    }
+
+    workbook.close();
+    return result;
+  }
+
   /**
-   * Build map of header name -> column index.
+   * Creates a map of headerName -> column index from the header row.
    */
   private Map<String, Integer> getHeaderIndexMap(Row headerRow) {
     Map<String, Integer> map = new HashMap<>();
@@ -256,8 +332,8 @@ public class ExcelReader {
   }
 
   /**
-   * Læs en celle som String, også hvis den er numerisk/boolsk.
-   * Returnerer null hvis tom.
+   * Reads a cell as a String.
+   * Returns null if empty.
    */
   private String getStringCell(Row row, Integer colIdx) {
     if (colIdx == null) {
@@ -289,7 +365,8 @@ public class ExcelReader {
   }
 
   /**
-   * Læs heltalsværdi fra en celle. Returnerer 0 hvis blank/ikke-numerisk.
+   * Reads an integer from a cell.
+   * Returns 0 if blank or not numeric.
    */
   private int getIntCell(Row row, Integer colIdx) { // TODO: sammenlign med getStringCell (Erik)
     if (colIdx == null) {

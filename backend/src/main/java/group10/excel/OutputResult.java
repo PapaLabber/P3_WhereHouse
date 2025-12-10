@@ -22,17 +22,30 @@ public class OutputResult {
     private final String outputDirPath;
 
     public OutputResult(@Value("${app.output-dir:./outputFile}") String outputDirPath) {
+        // Default to ./outputFile if no path is provided
         this.outputDirPath = (outputDirPath == null || outputDirPath.isBlank()) ? "./outputFile" : outputDirPath;
     }
 
+    // Default constructor used when no @Value is injected
     public OutputResult() {
         this("./outputFile");
     }
 
+    /**
+     * Creates an Excel file and delegates row filling to a RowFiller.
+     *
+     * @param sheetName name of the output sheet/file
+     * @param filler    callback to fill data rows
+     * @return the created file
+     */
     private File createOutputFile(String sheetName, RowFiller filler) throws IOException {
         try (Workbook wb = new XSSFWorkbook()) {
             Sheet sh = wb.createSheet(sheetName);
+
+            // Create header row
             createOutputHeaderRow(sh);
+
+            // Fill rows using provided lambda
             filler.fill(sh);
 
             File outputDir = new File(outputDirPath);
@@ -43,6 +56,7 @@ public class OutputResult {
 
             File f = new File(outputDir, sheetName);
 
+            // Write workbook to disk
             try (FileOutputStream out = new FileOutputStream(f)) {
                 wb.write(out);
             }
@@ -55,18 +69,28 @@ public class OutputResult {
         void fill(Sheet sh);
     }
 
+    /**
+     * Writes allocation results to an Excel file.
+     *
+     * @param results  list of results to export
+     * @param fileName name of the output Excel file
+     * @return path to the created file
+     */
     public Path writeResultsToExcel(List<Result> results, String fileName) throws IOException {
         if (!fileName.endsWith(".xlsx"))
             fileName += ".xlsx";
-          
+
+        // Ensure output directory exists
         Path outDir = Paths.get("./outputFile");
         Files.createDirectories(outDir);
         Path outFile = outDir.resolve(fileName);
 
+        // Create Excel file using row filler lambda
         createOutputFile(fileName, sh -> {
             int rowIndex = 1; // Start from row 1 since row 0 is header
             for (Result result : results) {
                 Row row = sh.createRow(rowIndex++);
+
                 Cell warehouseCell = row.createCell(0);
                 warehouseCell.setCellValue(result.getWarehouse().toString());
 
@@ -80,6 +104,9 @@ public class OutputResult {
         return outFile;
     }
 
+    /**
+     * Creates the header row for the output sheet.
+     */
     private void createOutputHeaderRow(Sheet sh) {
         Row header = sh.createRow(0);
         header.createCell(0).setCellValue("Warehouse");
