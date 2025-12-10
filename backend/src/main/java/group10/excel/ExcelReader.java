@@ -291,7 +291,7 @@ public class ExcelReader {
   /**
    * Læs heltalsværdi fra en celle. Returnerer 0 hvis blank/ikke-numerisk.
    */
-  private int getIntCell(Row row, Integer colIdx) { // TODO: sammenlign med getStringCell (Erik)
+  private int getIntCell(Row row, Integer colIdx) { 
     if (colIdx == null) {
       return 0;
     }
