@@ -67,10 +67,11 @@ public class WarehouseAllocator {
     }
 
     // -- 4) Warehouse capacities: sum_r x[r][c] <= capacity_c --
+    MPConstraint[] constraintCap = new MPConstraint[C];
     for (int c = 0; c < C; ++c) {
-      MPConstraint constraint = solver.makeConstraint(0.0, realisedCap.get(c).getPalletAmount()*0.8, "cap_" + c);
+      constraintCap[c] = solver.makeConstraint(0.0, realisedCap.get(c).getPalletAmount()*0.8, "cap_" + c);
       for (int r = 0; r < R; ++r) {
-        constraint.setCoefficient(x[r][c], 1.0);
+        constraintCap[c].setCoefficient(x[r][c], 1.0);
       }
     }
 
@@ -85,35 +86,31 @@ public class WarehouseAllocator {
     obj.setMinimization();
 
     // --- 6) Solve ---
-    final MPSolver.ResultStatus resultStatus = solver.solve();
+    MPSolver.ResultStatus resultStatus = solver.solve();
+    if (resultStatus != MPSolver.ResultStatus.OPTIMAL && resultStatus != MPSolver.ResultStatus.FEASIBLE) {
+      // -- 7) Re-set upper bound to be the 100% capacity 
+      for (int c = 0; c < C; ++c) {
+        constraintCap[c].setUb(realisedCap.get(c).getPalletAmount());
+      }
+      // --- 8) Resolve ---
+      resultStatus = solver.solve();
+    }
     if (resultStatus != MPSolver.ResultStatus.OPTIMAL && resultStatus != MPSolver.ResultStatus.FEASIBLE) {
       System.err.println("No feasible/optimal solution found: " + resultStatus);
     }
 
     System.out.println("Objective: " + obj.value());
 
-    // --- 7) Collect and write allocations to a list of result objects---
+    // --- 9) Collect and write allocations to a list of result objects---
     List<Result> allocResult = new ArrayList<>();
     for (int r = 0; r < R; ++r) {
-      List<String> allocList = new ArrayList<>();
       for (int c = 0; c < C; ++c) {
         long val = Math.round(x[r][c].solutionValue());
         if (val > 0) {
-          allocList.add(realisedCap.get(c).getWarehouse() + "_" + realisedCap.get(c).getTemperature() + "_" + val);
-          allocResult.add(new Result(realisedCap.get(c).getWarehouse(), realisedCap.get(c).getTemperature(), (int) val,
-              requests.get(r)));
+          allocResult.add(new Result(realisedCap.get(c).getWarehouse(), realisedCap.get(c).getTemperature(), (int) val, requests.get(r)));
         }
       }
-      String out = String.join(";", allocList);
-      System.out.println("Request " + requests.get(r).getID() + " " + requests.get(r).getTemperature() + " -> " + out);
     }
-    System.out.println("--- Full Allocations ---");
-    for (Result res : allocResult) {
-      System.out.println(res.toString());
-    }
-    System.out.println();
-    System.out.println();
-
     return allocResult;
   }
 }
