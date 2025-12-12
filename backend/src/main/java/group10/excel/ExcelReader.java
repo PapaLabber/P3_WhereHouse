@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -176,14 +177,12 @@ public class ExcelReader {
         continue;
       }
 
-      if (wantedCountry.toLowerCase() == "denmark") {
-        // Skip FP warehouses
-        Set<String> SKIP_WAREHOUSES = new HashSet<>(Arrays.asList("dsv", "ps hub"));
+      // Skip FP warehouses
+      Set<String> SKIP_WAREHOUSES = new HashSet<>(Arrays.asList("dsv", "ps hub"));
 
-        String warehouseCell = getStringCell(row, colIndex.get("Warehouse"));
-        if (warehouseCell != null && SKIP_WAREHOUSES.contains(warehouseCell.trim().toLowerCase(Locale.ROOT))) {
-          continue;
-        }
+      String warehouseCell = getStringCell(row, colIndex.get("Warehouse"));
+      if (warehouseCell != null && SKIP_WAREHOUSES.contains(warehouseCell.trim().toLowerCase(Locale.ROOT))) {
+        continue;
       }
 
       // PalletAmount > 0
@@ -228,6 +227,8 @@ public class ExcelReader {
    * Helper used for tests.
    * Returns RealizedCapacity filtered by country and year.
    */
+
+  // TODO
   public List<RealizedCapacity> warehouseCapacity(String wantedCountry, int wantedYear) throws IOException {
     // Get all and apply additional filtering
     List<RealizedCapacity> all = getRealizedCap(wantedCountry, wantedYear);
@@ -251,70 +252,6 @@ public class ExcelReader {
     return filtered;
   }
 
-  public List<String> extractCountry() throws IOException {
-    Iterator<Row> it = sheet.iterator();
-    if (!it.hasNext()) { // No rows
-      workbook.close();
-      return Collections.emptyList();
-    }
-
-    // Read header row and build mapping: header -> column index
-    Row headerRow = it.next();
-    Map<String, Integer> colIndex = getHeaderIndexMap(headerRow);
-
-    List<String> result = new ArrayList<>();
-
-    while (it.hasNext()) {
-      Row row = it.next();
-      if (row == null) {
-        continue;
-      }
-
-      // Country
-      String country = getStringCell(row, colIndex.get("Country"));
-      if (country == null || result.contains(country)) {
-        continue;
-      }
-
-      result.add(country);
-    }
-
-    workbook.close();
-    return result;
-  }
-
-  public List<Integer> extractYear() throws IOException {
-    Iterator<Row> it = sheet.iterator();
-    if (!it.hasNext()) { // No rows
-      workbook.close();
-      return Collections.emptyList();
-    }
-
-    // Read header row and build mapping: header -> column index
-    Row headerRow = it.next();
-    Map<String, Integer> colIndex = getHeaderIndexMap(headerRow);
-
-    List<Integer> result = new ArrayList<>();
-
-    while (it.hasNext()) {
-      Row row = it.next();
-      if (row == null) {
-        continue;
-      }
-
-      // Year
-      Integer year = getIntCell(row, colIndex.get("Year"));
-      if (year == null || result.contains(year)) {
-        continue;
-      }
-
-      result.add(year);
-    }
-
-    workbook.close();
-    return result;
-  }
-
   /**
    * Creates a map of headerName -> column index from the header row.
    */
@@ -335,6 +272,8 @@ public class ExcelReader {
    * Reads a cell as a String.
    * Returns null if empty.
    */
+
+  //TODO
   private String getStringCell(Row row, Integer colIdx) {
     if (colIdx == null) {
       return null; // header mangler
@@ -368,6 +307,8 @@ public class ExcelReader {
    * Reads an integer from a cell.
    * Returns 0 if blank or not numeric.
    */
+
+  // TODO
   private int getIntCell(Row row, Integer colIdx) { // TODO: sammenlign med getStringCell (Erik)
     if (colIdx == null) {
       return 0;

@@ -61,16 +61,6 @@ public class Controller {
 
   private List<RealizedCapacity> lastCapacities = new ArrayList<>();
   private List<Result> lastResults = new ArrayList<>();
-/* 
-  @GetMapping("/fillFilters")
-  public ResponseEntity<?> fillFilters() {
-    List<String> countryOptions = new ArrayList<>();
-    List<Integer> yearOptions = 
-
-    return ResponseEntity.ok()
-        .headers()
-        .body();
-  }*/
 
   /**
    * 
