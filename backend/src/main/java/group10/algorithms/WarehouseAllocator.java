@@ -78,11 +78,13 @@ public class WarehouseAllocator {
       }
     }
 
+
     // Warehouse capacity constraints (80% safety factor applied)
+    MPConstraint[] constraintCap = new MPConstraint[C];
     for (int c = 0; c < C; ++c) {
-      MPConstraint constraint = solver.makeConstraint(0.0, realisedCap.get(c).getPalletAmount() * 0.8, "cap_" + c);
+      constraintCap[c] = solver.makeConstraint(0.0, realisedCap.get(c).getPalletAmount() * 0.8, "cap_" + c);
       for (int r = 0; r < R; ++r) {
-        constraint.setCoefficient(x[r][c], 1.0);
+        constraintCap[c].setCoefficient(x[r][c], 1.0);
       }
     }
 
@@ -96,8 +98,18 @@ public class WarehouseAllocator {
 
     obj.setMinimization();
 
+
     // Solve MILP
-    final MPSolver.ResultStatus resultStatus = solver.solve();
+    MPSolver.ResultStatus resultStatus = solver.solve();
+    if (resultStatus != MPSolver.ResultStatus.OPTIMAL && resultStatus != MPSolver.ResultStatus.FEASIBLE) {
+      // Re-set upper bound to be the 100% capacity 
+      for (int c = 0; c < C; ++c) {
+        constraintCap[c].setUb(realisedCap.get(c).getPalletAmount());
+      }
+      // Resolve 
+      resultStatus = solver.solve();
+    }
+
     if (resultStatus != MPSolver.ResultStatus.OPTIMAL && resultStatus != MPSolver.ResultStatus.FEASIBLE) {
       System.err.println("No feasible/optimal solution found: " + resultStatus);
     }
@@ -105,16 +117,13 @@ public class WarehouseAllocator {
     // Collect final allocations
     List<Result> allocResult = new ArrayList<>();
     for (int r = 0; r < R; ++r) {
-      List<String> allocList = new ArrayList<>();
       for (int c = 0; c < C; ++c) {
         long val = Math.round(x[r][c].solutionValue());
         if (val > 0) {
-          allocResult.add(new Result(realisedCap.get(c).getWarehouse(), realisedCap.get(c).getTemperature(), (int) val,
-              requests.get(r)));
+          allocResult.add(new Result(realisedCap.get(c).getWarehouse(), realisedCap.get(c).getTemperature(), (int) val, requests.get(r)));
         }
       }
     }
-
     return allocResult;
   }
 }
