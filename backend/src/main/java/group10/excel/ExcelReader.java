@@ -227,8 +227,6 @@ public class ExcelReader {
    * Helper used for tests.
    * Returns RealizedCapacity filtered by country and year.
    */
-
-  // TODO
   public List<RealizedCapacity> warehouseCapacity(String wantedCountry, int wantedYear) throws IOException {
     // Get all and apply additional filtering
     List<RealizedCapacity> all = getRealizedCap(wantedCountry, wantedYear);
@@ -241,10 +239,6 @@ public class ExcelReader {
       }
 
       Warehouse wh = rc.getWarehouse();
-      // Hvis Warehouse ikke har country, så fjern dette filter.
-      // if (!wh.getCountry().equalsIgnoreCase(wantedCountry)) {
-      // continue;
-      // }
 
       filtered.add(rc);
     }
@@ -269,18 +263,20 @@ public class ExcelReader {
   }
 
   /**
-   * Reads a cell as a String.
-   * Returns null if empty.
+   * Reads a cell value as a String.
+   *
+   * Supports string, numeric, and boolean cell types.
+   * Returns null if the cell is missing, blank, or unsupported.
    */
-
-  //TODO
   private String getStringCell(Row row, Integer colIdx) {
     if (colIdx == null) {
-      return null; // header mangler
+      return null; // Column not found in header
     }
+
+    // Get cell or treat blank as null
     Cell cell = row.getCell(colIdx, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
     if (cell == null) {
-      return null;
+      return null; // Empty cell
     }
 
     switch (cell.getCellType()) {
@@ -288,6 +284,7 @@ public class ExcelReader {
         return cell.getStringCellValue();
 
       case NUMERIC:
+        // Convert numeric value to string (avoid trailing .0 for integers)
         double n = cell.getNumericCellValue();
         if (n == Math.floor(n)) {
           return String.valueOf((long) n);
@@ -299,35 +296,40 @@ public class ExcelReader {
         return String.valueOf(cell.getBooleanCellValue());
 
       default:
+        // Unsupported cell type
         return null;
     }
   }
 
   /**
-   * Reads an integer from a cell.
-   * Returns 0 if blank or not numeric.
+   * Reads an integer value from a cell.
+   *
+   * Returns 0 if the cell is missing, blank, or cannot be parsed as an integer.
    */
-
-  // TODO
   private int getIntCell(Row row, Integer colIdx) { // TODO: sammenlign med getStringCell (Erik)
     if (colIdx == null) {
-      return 0;
+      return 0; // Column not found in header
     }
+
+    // Get cell or treat blank as null
     Cell cell = row.getCell(colIdx, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
     if (cell == null) {
-      return 0;
+      return 0; // Empty cell
     }
 
     switch (cell.getCellType()) {
       case NUMERIC:
+        // Numeric cell (rounded to nearest integer)
         return (int) Math.round(cell.getNumericCellValue());
       case STRING:
+        // String cell, attempt to parse as integer
         try {
           return Integer.parseInt(cell.getStringCellValue().trim());
         } catch (NumberFormatException e) {
           return 0;
         }
       default:
+        // Unsupported cell type
         return 0;
     }
   }
