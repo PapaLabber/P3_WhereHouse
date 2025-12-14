@@ -1,0 +1,17 @@
+{
+  "name": "wherehouse-e2e",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start:services": "docker compose -f ../compose.yaml up -d --build",
+    "stop:services": "docker compose -f ../compose.yaml down",
+    "test": "npx playwright test",
+    "e2e": "npm run start:services && npx wait-on http://localhost:3000 && npx playwright test && npm run stop:services"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^20.0.0",
+    "exceljs": "^4.4.0",
+    "wait-on": "^7.2.0"
+  }
+}
