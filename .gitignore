@@ -69,6 +69,7 @@ out/
 # FRONTEND (React / Node)
 ########################################
 
+coverage/
 node_modules/
 dist/
 build/
@@ -104,4 +105,3 @@ package-lock.json
 
 # macOS
 .DS_Store
-outputFile/AllocatedResult2025DENMARK.xlsx

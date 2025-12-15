@@ -1,7 +1,8 @@
 
-  import { defineConfig } from 'vite';
+  import { defineConfig } from 'vitest/config';
   import react from '@vitejs/plugin-react-swc';
   import path from 'path';
+import { env } from 'process';
 
   export default defineConfig({
     plugins: [react()],
@@ -59,5 +60,14 @@
       proxy: {
         "api": "http://localhost:8080"
       },
+    },
+    test: {
+      environment: 'happy-dom',
+      setupFiles: './src/test/setupTests.ts',
+      include: ['src/**/*.test.{ts,tsx}'],
+      globals: true,
+      coverage: {
+        provider: 'istanbul'
+      }
     },
   });
