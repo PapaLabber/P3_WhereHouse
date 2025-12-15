@@ -5,6 +5,7 @@ import { ResultsDownload } from "./components/ResultsDownload";
 import { processDataFromBackend, type ProcessedResult } from "./utils/dataProcessor";
 import { Warehouse } from "lucide-react";
 import { DropdownSelect, type Option } from "./components/DropdownSelect";
+import WarehouseDashboardComponent from "./components/WarehouseDashboard";
 
 type Country = "DENMARK" | "SWEDEN" | "NORWAY";
 type Year = "2025" | "2026" | "2027";
@@ -63,6 +64,7 @@ export default function App() {
         alert(`Download fejlede (HTTP ${res.status}). Se console for detaljer.`);
         return;
       }
+
 
       const blob = await res.blob();
       if (!blob || blob.size === 0) {
@@ -195,7 +197,15 @@ export default function App() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
-  );
+        
+        <section className="mt-10">
+        <h2 className="text-xl font-semibold text-[#001965] mb-4">
+          Dashboard
+        </h2>
+        <WarehouseDashboardComponent isProcessing={isProcessing} />
+      </section>
+
+    </main>
+  </div>
+);
 }

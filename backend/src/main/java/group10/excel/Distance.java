@@ -1,5 +1,8 @@
 package group10.excel;
 
+/**
+ * Respresents the distance between a warehouse and a production site
+ */
 public class Distance {
   private Warehouse warehouse;
   private ProductionSite productionSite;

@@ -1,5 +1,8 @@
 package group10.excel;
 
+/**
+ * Represents the realized capacity of one warehouse
+ */
 public class RealizedCapacity {
   private int palletAmount;
   private Temperature temperature;
