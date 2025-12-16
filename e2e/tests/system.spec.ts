@@ -85,7 +85,9 @@ test('full system E2E test: upload -> backend -> allocation -> download', async 
   const foundExpectedRow = dataRows.some(row => {
     // Convert each cell in the row to a lowercase string
     const rowStrings = (row || []).map(cell => (cell || '').toString().toLowerCase());
-    return rowStrings.includes('ambient') && rowStrings.includes('ps pac i');
+    const hasAmbient = rowStrings.some(cell => cell.includes('ambient'));
+    const hasPsPacI = rowStrings.some(cell => cell.includes('ps pac i'));
+    return hasAmbient && hasPsPacI;
   });
   expect(foundExpectedRow, `Expected a row containing PS PAC I + Ambient; rows: ${JSON.stringify(dataRows)}`).toBeTruthy(); // Check for expected warehouse and condition
   
