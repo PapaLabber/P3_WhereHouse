@@ -105,3 +105,8 @@ package-lock.json
 
 # macOS
 .DS_Store
+e2e/test-results/.last-run.json
+e2e/fixtures/upload_fixture.xlsx
+e2e/fixtures/downloaded.xlsx
+backend/outputFile/IntegrationOut.xlsx
+outputFile/AllocatedResult2025DENMARK.xlsx
