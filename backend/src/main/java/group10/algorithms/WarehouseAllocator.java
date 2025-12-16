@@ -15,111 +15,123 @@ import group10.excel.CapacityRequest;
 import group10.excel.RealizedCapacity;
 import group10.excel.Result;
 
-@Service // TODO: Forklar nærmere (Philippe)
+/**
+ * OR-Tools based allocator for distributing product into warehouse capacity.
+ */
+@Service
 public class WarehouseAllocator {
+  /**
+   * Allocates pallet requests to warehouse capacity while minimizing transport
+   * distance.
+   *
+   * @param requests    factory requests (demand)
+   * @param realisedCap warehouse capacity entries (supply)
+   * @return list of Result objects describing final allocations
+   */
 
-    // add the new helper method inside the class (but outside Allocator)
-    public static double[][] computeTransportDistances(List<CapacityRequest> requests, List<RealizedCapacity> realisedCap) {
-        int R = requests.size();
-        int C = realisedCap.size();
-        double[][] transportDistances = new double[C][R];
+  // helper method to find transport distances
+  public static double[][] computeTransportDistances(List<CapacityRequest> requests,
+      List<RealizedCapacity> realisedCap) {
+    int R = requests.size();
+    int C = realisedCap.size();
+    double[][] transportDistances = new double[C][R];
 
-        for (int c = 0; c < C; ++c) {
-            double c_x = realisedCap.get(c).getWarehouse().getLongitude();
-            double c_y = realisedCap.get(c).getWarehouse().getLatitude();
-            for (int r = 0; r < R; ++r) {
-                double r_x = requests.get(r).getProductionSite().getLongitude();
-                double r_y = requests.get(r).getProductionSite().getLatitude();
-                transportDistances[c][r] = Math.hypot(c_x - r_x, c_y - r_y);
-            }
+    for (int c = 0; c < C; ++c) {
+      double c_x = realisedCap.get(c).getWarehouse().getLongitude();
+      double c_y = realisedCap.get(c).getWarehouse().getLatitude();
+      for (int r = 0; r < R; ++r) {
+        double r_x = requests.get(r).getProductionSite().getLongitude();
+        double r_y = requests.get(r).getProductionSite().getLatitude();
+        transportDistances[c][r] = Math.hypot(c_x - r_x, c_y - r_y);
+      }
+    }
+    return transportDistances;
+  }
+
+  public List<Result> Allocator(List<CapacityRequest> requests, List<RealizedCapacity> realisedCap) {
+
+    Loader.loadNativeLibraries(); // OR-Tools native libs
+
+    int R = requests.size();
+    int C = realisedCap.size();
+
+    // Compute Euclidean distance between each warehouse and each production site
+    double[][] transportDistances = computeTransportDistances(requests, realisedCap);
+
+    // Create MILP solver
+    MPSolver solver = MPSolver.createSolver("CBC_MIXED_INTEGER_PROGRAMMING");
+
+    // Decision variables: pallets assigned from request r to warehouse c
+    MPVariable[][] x = new MPVariable[R][C];
+    for (int r = 0; r < R; ++r) {
+      for (int c = 0; c < C; ++c) {
+        String name = String.format("x_%d_%d", r, c);
+
+        // Integer variable >= 0, up to demand_r (safe upper bound)
+        x[r][c] = solver.makeIntVar(0, requests.get(r).getPalletAmount(), name);
+
+        // Enforce temperature compatibility
+        if (realisedCap.get(c).getTemperature() != requests.get(r).getTemperature()) {
+          x[r][c].setUb(0.0);
         }
-        return transportDistances;
+      }
     }
 
-    public List<Result> Allocator(List<CapacityRequest> requests, List<RealizedCapacity> realisedCap) {
-        Loader.loadNativeLibraries(); // OR-Tools native libs
-
-        // We want the size of requests and realisedCap(realised capacity) because we
-        // see them as single warehouse capacities and requests
-        int R = requests.size();
-        int C = realisedCap.size();
-
-        // -- 1) Find transport distances --
-        double[][] transportDistances = computeTransportDistances(requests, realisedCap);
-
-        MPSolver solver = MPSolver.createSolver("CBC_MIXED_INTEGER_PROGRAMMING");
-
-        // -- 2) compatibility variable matrix: x[r][c] --
-        MPVariable[][] x = new MPVariable[R][C];
-        for (int r = 0; r < R; ++r) {
-            for (int c = 0; c < C; ++c) {
-                String name = String.format("x_%d_%d", r, c);
-                // Integer variable >= 0, up to demand_r (safe upper bound)
-                x[r][c] = solver.makeIntVar(0, requests.get(r).getPalletAmount(), name);
-                // Enforce temperature compatibility: if not compatible, set upper bound 0
-                if (realisedCap.get(c).getTemperature() != requests.get(r).getTemperature()) {
-                    x[r][c].setUb(0.0);
-                }
-            }
-        }
-
-        // -- 3) Request demands: sum_c x[r][c] == demand_r --
-        for (int r = 0; r < R; ++r) {
-            MPConstraint constraint = solver.makeConstraint(requests.get(r).getPalletAmount(),
-                    requests.get(r).getPalletAmount(), "demand_" + r);
-            for (int c = 0; c < C; ++c) {
-                constraint.setCoefficient(x[r][c], 1.0);
-            }
-        }
-
-        // -- 4) Warehouse capacities: sum_r x[r][c] <= capacity_c --
-        for (int c = 0; c < C; ++c) {
-            MPConstraint constraint = solver.makeConstraint(0.0, realisedCap.get(c).getPalletAmount() * 0.8, "cap_" + c);
-            for (int r = 0; r < R; ++r) {
-                constraint.setCoefficient(x[r][c], 1.0);
-            }
-        }
-
-        // -- 5) Objective: minimize sum_{r,c} dist[c][r] * x[r][c] --
-        MPObjective obj = solver.objective();
-        for (int r = 0; r < R; ++r) {
-            for (int c = 0; c < C; ++c) {
-                obj.setCoefficient(x[r][c], transportDistances[c][r]);
-            }
-        }
-
-        obj.setMinimization();
-
-        // --- 6) Solve ---
-        final MPSolver.ResultStatus resultStatus = solver.solve();
-        if (resultStatus != MPSolver.ResultStatus.OPTIMAL && resultStatus != MPSolver.ResultStatus.FEASIBLE) {
-            System.err.println("No feasible/optimal solution found: " + resultStatus);
-        }
-
-        System.out.println("Objective: " + obj.value());
-
-        // --- 7) Collect and write allocations to a list of result objects---
-        List<Result> allocResult = new ArrayList<>();
-        for (int r = 0; r < R; ++r) {
-            List<String> allocList = new ArrayList<>();
-            for (int c = 0; c < C; ++c) {
-                long val = Math.round(x[r][c].solutionValue());
-                if (val > 0) {
-                    allocList.add(realisedCap.get(c).getWarehouse() + "_" + realisedCap.get(c).getTemperature() + "_" + val);
-                    allocResult.add(new Result(realisedCap.get(c).getWarehouse(), realisedCap.get(c).getTemperature(), (int) val, requests.get(r)));
-                }
-            }
-            String out = String.join(";", allocList);
-            System.out.println("Request " + requests.get(r).getID() + " " + requests.get(r).getTemperature() + " -> " + out);
-        }
-        System.out.println("--- Full Allocations ---");
-        for (Result res : allocResult) {
-            System.out.println(res.toString());
-        }
-
-        System.out.println();
-        System.out.println();
-
-        return allocResult;
+    // Each request must be fully satisfied
+    for (int r = 0; r < R; ++r) {
+      MPConstraint constraint = solver.makeConstraint(requests.get(r).getPalletAmount(),
+          requests.get(r).getPalletAmount(), "demand_" + r);
+      for (int c = 0; c < C; ++c) {
+        constraint.setCoefficient(x[r][c], 1.0);
+      }
     }
+
+    // Warehouse capacity constraints (80% safety factor applied)
+    MPConstraint[] constraintCap = new MPConstraint[C];
+    for (int c = 0; c < C; ++c) {
+      constraintCap[c] = solver.makeConstraint(0.0, realisedCap.get(c).getPalletAmount() * 0.8, "cap_" + c);
+      for (int r = 0; r < R; ++r) {
+        constraintCap[c].setCoefficient(x[r][c], 1.0);
+      }
+    }
+
+    // Objective: minimize total distance moved
+    MPObjective obj = solver.objective();
+    for (int r = 0; r < R; ++r) {
+      for (int c = 0; c < C; ++c) {
+        obj.setCoefficient(x[r][c], transportDistances[c][r]);
+      }
+    }
+
+    obj.setMinimization();
+
+    // Solve MILP
+    MPSolver.ResultStatus resultStatus = solver.solve();
+    if (resultStatus != MPSolver.ResultStatus.OPTIMAL && resultStatus != MPSolver.ResultStatus.FEASIBLE) {
+      // Re-set upper bound to be the 100% capacity
+      for (int c = 0; c < C; ++c) {
+        constraintCap[c].setUb(realisedCap.get(c).getPalletAmount());
+      }
+      // Resolve
+      resultStatus = solver.solve();
+    }
+
+    // Check again with new upper bound result
+    if (resultStatus != MPSolver.ResultStatus.OPTIMAL && resultStatus != MPSolver.ResultStatus.FEASIBLE) {
+      System.err.println("No feasible/optimal solution found: " + resultStatus);
+    }
+
+    // Collect final allocations
+    List<Result> allocResult = new ArrayList<>();
+    for (int r = 0; r < R; ++r) {
+      for (int c = 0; c < C; ++c) {
+        long val = Math.round(x[r][c].solutionValue());
+        if (val > 0) {
+          allocResult.add(new Result(realisedCap.get(c).getWarehouse(), realisedCap.get(c).getTemperature(),
+              (int) val, requests.get(r)));
+        }
+      }
+    }
+    return allocResult;
+  }
 }

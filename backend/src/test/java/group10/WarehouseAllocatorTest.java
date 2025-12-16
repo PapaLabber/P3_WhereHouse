@@ -36,16 +36,13 @@ class WarehouseAllocatorTest {
         requests.add(new CapacityRequest(80, Temperature.COLD, ProductionSite.fromName("Kalundborg"), 2, 2026));
         requests.add(new CapacityRequest(80, Temperature.FREEZE, ProductionSite.fromName("Hjørring"), 3, 2026));
 
-        realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
-        realisedCap.add(new RealizedCapacity(100, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
-        realisedCap.add(new RealizedCapacity(100, Temperature.FREEZE, Warehouse.fromName("NEFF"), 2026));
+        realisedCap.add(new RealizedCapacity(125, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealizedCapacity(125, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
+        realisedCap.add(new RealizedCapacity(125, Temperature.FREEZE, Warehouse.fromName("NEFF"), 2026));
 
         WarehouseAllocator allocator = new WarehouseAllocator();
-
         List<Result> result = allocator.Allocator(requests, realisedCap);
-
-        System.out.println(result);
-
+        
         List<Result> expected = new ArrayList<>();
         expected.add(new Result(Warehouse.fromName("PS PAC I"), Temperature.AMBIENT, 80, requests.get(0)));
         expected.add(new Result(Warehouse.fromName("PS PAC II"), Temperature.COLD, 80, requests.get(1)));
@@ -67,9 +64,9 @@ class WarehouseAllocatorTest {
         requests.add(new CapacityRequest(100, Temperature.COLD, ProductionSite.fromName("Kalundborg"), 2, 2026));
         requests.add(new CapacityRequest(100, Temperature.FREEZE, ProductionSite.fromName("Hjørring"), 3, 2026));
 
-        realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
-        realisedCap.add(new RealizedCapacity(100, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
-        realisedCap.add(new RealizedCapacity(100, Temperature.FREEZE, Warehouse.fromName("NEFF"), 2026));
+        realisedCap.add(new RealizedCapacity(125, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealizedCapacity(125, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
+        realisedCap.add(new RealizedCapacity(125, Temperature.FREEZE, Warehouse.fromName("NEFF"), 2026));
 
         WarehouseAllocator allocator = new WarehouseAllocator();
 
@@ -89,7 +86,7 @@ class WarehouseAllocatorTest {
 
         requests.add(new CapacityRequest(80, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
 
-        realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealizedCapacity(125, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
 
         WarehouseAllocator allocator = new WarehouseAllocator();
 
@@ -114,9 +111,9 @@ class WarehouseAllocatorTest {
         requests.add(new CapacityRequest(80, Temperature.COLD, ProductionSite.fromName("Kalundborg"), 2, 2026));
         requests.add(new CapacityRequest(80, Temperature.FREEZE, ProductionSite.fromName("Hjørring"), 3, 2026));
 
-        realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
-        realisedCap.add(new RealizedCapacity(100, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
-        realisedCap.add(new RealizedCapacity(100, Temperature.FREEZE, Warehouse.fromName("NEFF"), 2026));
+        realisedCap.add(new RealizedCapacity(125, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealizedCapacity(125, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
+        realisedCap.add(new RealizedCapacity(125, Temperature.FREEZE, Warehouse.fromName("NEFF"), 2026));
         
         realisedCap.add(new RealizedCapacity(0, Temperature.AMBIENT, Warehouse.fromName("PS HUB"), 2026));
         realisedCap.add(new RealizedCapacity(0, Temperature.COLD, Warehouse.fromName("PS HUB"), 2026));
@@ -145,8 +142,8 @@ class WarehouseAllocatorTest {
 
         requests.add(new CapacityRequest(80, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
 
-        realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
-        realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC II"), 2026));
+        realisedCap.add(new RealizedCapacity(125, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealizedCapacity(125, Temperature.AMBIENT, Warehouse.fromName("PS PAC II"), 2026));
 
         WarehouseAllocator allocator = new WarehouseAllocator();
 
@@ -169,8 +166,8 @@ class WarehouseAllocatorTest {
 
         requests.add(new CapacityRequest(100, Temperature.AMBIENT, ProductionSite.fromName("Hillerød"), 1, 2026));
 
-        realisedCap.add(new RealizedCapacity(100, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
-        realisedCap.add(new RealizedCapacity(40, Temperature.AMBIENT, Warehouse.fromName("PS PAC II"), 2026));
+        realisedCap.add(new RealizedCapacity(75, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
+        realisedCap.add(new RealizedCapacity(50, Temperature.AMBIENT, Warehouse.fromName("PS PAC II"), 2026));
 
         WarehouseAllocator allocator = new WarehouseAllocator();
 
