@@ -103,7 +103,7 @@ export default function App() {
             <Warehouse className="h-8 w-8" />
             <h1 className="text-3xl font-bold">Warehouse</h1>
           </div>
-          <p className="mt-2 text-blue-100">XXX</p>
+          <p className="mt-2 text-blue-100">Allocation Tool for Distributing Materials Across Warehouses</p>
         </div>
       </header>
 
@@ -118,12 +118,10 @@ export default function App() {
                 How it works
               </h3>
               <ul className="text-sm text-gray-700 space-y-1">
-                <li>• Upload your xlsx file with any data structure</li>
+                <li>• Upload your XLSX file following the specified data structure to ensure correct processing.</li>
                 <li>• WhereHouse will intelligently process your data</li>
-                <li>
-                  • Location-based prompts will generate Google Maps suggestions
-                </li>
                 <li>• Download your processed xlsx with the refined dataset</li>
+                <li>• A dashboard will be displayed after the output results have been processed.</li>
               </ul>
             </div>
           </div>
@@ -135,7 +133,7 @@ export default function App() {
                 Step 1: Select Country &amp; Year
               </h2>
               <p className="text-sm text-muted-foreground mb-4">
-                Choose the country and year for which you want to allocate your addresses.
+                Choose the country and year for which you want to allocate the pallets.
               </p>
 
               <div className="grid grid-cols-2 gap-4">

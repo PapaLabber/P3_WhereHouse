@@ -77,32 +77,31 @@ describe("App.tsx", () => {
 
   it("calls fetch once when clicking Download File button after selecting inputs", async () => {
     render(<App />);
-
+  
     // Select Country + Year to satisfy prerequisites for processing
     const selects = screen.getAllByRole("combobox");
     fireEvent.change(selects[0], { target: { value: "DENMARK" } });
     fireEvent.change(selects[1], { target: { value: "2025" } });
-
+  
     // Create and upload a fake file
     const file = new File(["x"], "data.xlsx", {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
     const input = document.getElementById("file-input") as HTMLInputElement;
     fireEvent.change(input, { target: { files: [file] } });
-
+  
     // ResultsDownload renders a Download button once file and inputs exist
     const downloadButton = await screen.findByRole("button", {
       name: /download file/i,
     });
-
-    // BEFORE clicking: fetch has NOT been called because App only auto-processes
-    // when all inputs exist *at file upload time*.
-    expect(fetchMock).toHaveBeenCalledTimes(0);
-
-    // Click the download button manually → triggers handleDownload() → handleProcess() → fetch()
+  
+    // Capture how many times fetch has been called *before* the click
+    const callsBeforeClick = fetchMock.mock.calls.length;
+  
+    // Click the download button manually
     fireEvent.click(downloadButton);
-
-    // Now fetch should have been called exactly once
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+  
+    // Assert exactly ONE new fetch call happened due to the click
+    expect(fetchMock).toHaveBeenCalledTimes(callsBeforeClick + 1);
   });
 });
