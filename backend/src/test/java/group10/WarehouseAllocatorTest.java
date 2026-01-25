@@ -23,7 +23,7 @@ import group10.excel.Warehouse;
  * - Objective value correctness
  */
 class WarehouseAllocatorTest {
-    /*                               
+    /*
      * Test 1: Optimal problem with exact capacity match.
      * Supply equals demand; all warehouses can serve factories.
      */
@@ -42,7 +42,7 @@ class WarehouseAllocatorTest {
 
         WarehouseAllocator allocator = new WarehouseAllocator();
         List<Result> result = allocator.Allocator(requests, realisedCap);
-        
+
         List<Result> expected = new ArrayList<>();
         expected.add(new Result(Warehouse.fromName("PS PAC I"), Temperature.AMBIENT, 80, requests.get(0)));
         expected.add(new Result(Warehouse.fromName("PS PAC II"), Temperature.COLD, 80, requests.get(1)));
@@ -77,7 +77,8 @@ class WarehouseAllocatorTest {
     }
 
     /*
-     * Test 3: Optimal problem - Single warehouse, single product, single factory (trivial case).
+     * Test 3: Optimal problem - Single warehouse, single product, single factory
+     * (trivial case).
      */
     @Test
     void testTrivialProblem_SingleDimension() {
@@ -94,7 +95,7 @@ class WarehouseAllocatorTest {
         List<Result> expected = new ArrayList<>();
 
         expected.add(new Result(Warehouse.fromName("PS PAC I"), Temperature.AMBIENT, 80, requests.get(0)));
-        
+
         assertEquals(expected.toString(), result.toString(), "Expected optimal solution for trivial problem");
     }
 
@@ -114,7 +115,7 @@ class WarehouseAllocatorTest {
         realisedCap.add(new RealizedCapacity(125, Temperature.AMBIENT, Warehouse.fromName("PS PAC I"), 2026));
         realisedCap.add(new RealizedCapacity(125, Temperature.COLD, Warehouse.fromName("PS PAC II"), 2026));
         realisedCap.add(new RealizedCapacity(125, Temperature.FREEZE, Warehouse.fromName("NEFF"), 2026));
-        
+
         realisedCap.add(new RealizedCapacity(0, Temperature.AMBIENT, Warehouse.fromName("PS HUB"), 2026));
         realisedCap.add(new RealizedCapacity(0, Temperature.COLD, Warehouse.fromName("PS HUB"), 2026));
         realisedCap.add(new RealizedCapacity(0, Temperature.FREEZE, Warehouse.fromName("PS HUB"), 2026));
@@ -128,7 +129,8 @@ class WarehouseAllocatorTest {
         expected.add(new Result(Warehouse.fromName("PS PAC II"), Temperature.COLD, 80, requests.get(1)));
         expected.add(new Result(Warehouse.fromName("NEFF"), Temperature.FREEZE, 80, requests.get(2)));
 
-        assertEquals(expected.toString(), result.toString(), "Expected optimal solution with zero capacity constraints");
+        assertEquals(expected.toString(), result.toString(),
+                "Expected optimal solution with zero capacity constraints");
     }
 
     /*
@@ -184,7 +186,7 @@ class WarehouseAllocatorTest {
      * Test 7: computeDistances.
      * 
      */
-@Test
+    @Test
     void computeTransportDistances_matchesExpected() {
         List<CapacityRequest> requests = new ArrayList<>();
         List<RealizedCapacity> realised = new ArrayList<>();
@@ -201,9 +203,10 @@ class WarehouseAllocatorTest {
         for (int c = 0; c < realised.size(); c++) {
             for (int r = 0; r < requests.size(); r++) {
                 double expected = Math.hypot(
-                    realised.get(c).getWarehouse().getLongitude() - requests.get(r).getProductionSite().getLongitude(),
-                    realised.get(c).getWarehouse().getLatitude() - requests.get(r).getProductionSite().getLatitude()
-                );
+                        realised.get(c).getWarehouse().getLongitude()
+                                - requests.get(r).getProductionSite().getLongitude(),
+                        realised.get(c).getWarehouse().getLatitude()
+                                - requests.get(r).getProductionSite().getLatitude());
                 assertEquals(expected, matrix[c][r], "Expected same distances found in method as above computation");
             }
         }
